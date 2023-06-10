@@ -1,7 +1,7 @@
 use opencv::{prelude::*, core, videoio, Result};
 use opencv::videoio::{VideoCapture, VideoWriter};
-use opencv::core::{Scalar, MatTrait};
-use opencv::imgproc::{cvt_color, COLOR_BGR2HSV, COLOR_HSV2BGR, warp_affine};
+use opencv::core::Scalar;
+use opencv::imgproc::warp_affine;
 use rand::Rng;
 
 pub fn create(input: &str, output: &str, beats: &[f32], cuts: &[f32]) -> Result<()> {
@@ -20,24 +20,6 @@ pub fn create(input: &str, output: &str, beats: &[f32], cuts: &[f32]) -> Result<
 
     out.release()?;
     Ok(())
-}
-
-fn saturate(frame: &Mat, saturation_factor: f32) -> Mat {
-    let mut hsv_image = Mat::default();
-    cvt_color(frame, &mut hsv_image, COLOR_BGR2HSV, 0).unwrap();
-
-    for y in 0..hsv_image.rows() {
-        for x in 0..hsv_image.cols() {
-            let pixel = hsv_image.at_2d_mut::<opencv::core::Vec3b>(y, x).unwrap();
-            let saturation = pixel[1] as i16;
-            let adjusted_saturation = (saturation as f32 * saturation_factor) as i16;
-            pixel[1] = adjusted_saturation.max(0).min(255) as u8;
-        }
-    }
-
-    let mut output_image = Mat::default();
-    cvt_color(&hsv_image, &mut output_image, COLOR_HSV2BGR, 0).unwrap();
-    output_image
 }
 
 fn shift(frame: &Mat, xshift: i32, yshift: i32) -> Mat {
@@ -81,20 +63,16 @@ fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_
         }
     }
 
-    let mut saturation: f32 = 3.;
-
     video.set(videoio::CAP_PROP_POS_FRAMES, begin as f64)?;
     for i in 0..frames {
         let progress: f32 = i as f32 / frames as f32;
 
         let mut frame: Mat = Mat::default();
         video.read(&mut frame)?;
-        let adjusted: Mat = shift(&saturate(&frame, saturation),
+        let adjusted: Mat = shift(&frame,
             (25. * f32::exp(-10. * progress) * f32::cos(1.5 * i as f32 + 0.5)) as i32,
             (25. * f32::exp(-10. * progress) * f32::sin(2. * i as f32)) as i32
         );
-
-        saturation = 1. + 2. * f32::exp(-(2. * i as f32) / (frames as f32));
 
         writer.write(&adjusted)?;
     }

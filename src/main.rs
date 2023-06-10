@@ -9,9 +9,11 @@ fn t(minute: i32, seconds: i32) -> f32 {
 fn main() {
     let songs: Vec<(&str, Vec<f32>)> = vec![
         ("res/metamorphosis.mp3", (0..18).map(|x| x as f32 * 0.67).collect::<Vec<f32>>()),
-        ("res/neon-blade.mp4", _)
+        ("res/neon-blade.mp3", vec![vec![0., 2.68], (1..18).map(|x| 2.68 + x as f32 * 0.633).collect::<Vec<f32>>()].into_iter().flatten().collect()),
+        ("res/dancin.mp3", (0..34).map(|x| x as f32 * 0.53).collect::<Vec<f32>>())
     ];
     let song: (&str, Vec<f32>) = songs[rand::thread_rng().gen_range(0..songs.len())].clone();
+    println!("Selected random song: {}", song.0);
 
     video::create("res/bateman.mp4", "no-audio.mp4", &song.1,
             &[t(0, 2), t(0, 7), t(0, 11), t(0, 16), t(0, 22), t(0, 24), t(0, 27), t(0, 30), t(0, 34),
