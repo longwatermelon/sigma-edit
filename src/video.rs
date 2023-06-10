@@ -1,7 +1,7 @@
 use opencv::{prelude::*, core, videoio, Result};
 use opencv::videoio::{VideoCapture, VideoWriter};
-use opencv::core::Scalar;
-use opencv::imgproc::warp_affine;
+use opencv::core::{Scalar, Point};
+use opencv::imgproc::{warp_affine, put_text};
 use rand::Rng;
 
 pub fn create(input: &str, output: &str, beats: &[f32], cuts: &[f32]) -> Result<()> {
@@ -13,9 +13,24 @@ pub fn create(input: &str, output: &str, beats: &[f32], cuts: &[f32]) -> Result<
         core::Size_ { width: w, height: h }, true
     )?;
 
+    let quotes: Vec<String> = vec![
+        "Lone wolf by choice.",
+        "Be independent.",
+        "March to your own beat.",
+        "Embrace solitude, find strength.",
+        "Master of my own destiny.",
+        "Unconventional and free-spirited.",
+        "Silent strength, hidden potential.",
+        "Society's labels don't define me.",
+        "Reserved but self-assured.",
+        "Walk my own path, create my own rules."
+    ].iter().map(|x| x.to_string()).collect();
+    let quote: String = quotes[rand::thread_rng().gen_range(0..quotes.len())].clone();
+    let rule_num: i32 = rand::thread_rng().gen_range(1..200);
+
     for i in 1..beats.len() {
-        println!("Writing beat interval {:.2} to {:.2}...", beats[i - 1], beats[i]);
-        write_beat_interval(&mut out, &mut video, beats[i] - beats[i - 1], cuts)?;
+        println!("({}/{}) Writing beat interval {:.2} to {:.2}...", i, beats.len() - 1, beats[i - 1], beats[i]);
+        write_beat_interval(&mut out, &mut video, beats[i] - beats[i - 1], cuts, quote.clone(), rule_num)?;
     }
 
     out.release()?;
@@ -42,7 +57,7 @@ fn shift(frame: &Mat, xshift: i32, yshift: i32) -> Mat {
     shifted_image
 }
 
-fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_len: f32, cuts: &[f32]) -> Result<()> {
+fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_len: f32, cuts: &[f32], quote: String, rule_number: i32) -> Result<()> {
     let frames: i32 = (30. * beat_len) as i32;
     let total_frames: i32 = video.get(videoio::CAP_PROP_FRAME_COUNT)? as i32;
 
@@ -69,10 +84,30 @@ fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_
 
         let mut frame: Mat = Mat::default();
         video.read(&mut frame)?;
-        let adjusted: Mat = shift(&frame,
+        let mut adjusted: Mat = shift(&frame,
             (25. * f32::exp(-10. * progress) * f32::cos(1.5 * i as f32 + 0.5)) as i32,
             (25. * f32::exp(-10. * progress) * f32::sin(2. * i as f32)) as i32
         );
+
+        let text: String = format!("Sigma Rule #{}: {}", rule_number, quote);
+        let font_scale = 1.;
+        let thickness = 3;
+        let text_size = opencv::imgproc::get_text_size(text.as_str(), 0, font_scale, thickness, &mut 0)?;
+
+        let x = (frame.cols() - text_size.width) / 2;
+        let y = (frame.rows() - text_size.height) / 2;
+
+        put_text(
+            &mut adjusted,
+            text.as_str(),
+            Point::new(x, y),
+            0,
+            font_scale,
+            Scalar::new(255., 255., 255., 0.),
+            thickness,
+            0,
+            false
+        )?;
 
         writer.write(&adjusted)?;
     }
