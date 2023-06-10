@@ -1,25 +1,16 @@
-use opencv::{prelude::*, core, videoio, Result};
-use opencv::videoio::{VideoCapture, VideoWriter};
+mod video;
 
-fn main() -> Result<()> {
-    let mut video: VideoCapture = VideoCapture::from_file("res/bateman.mp4", videoio::CAP_ANY)?; // 0 is the default camera
-    let w: i32 = video.get(videoio::CAP_PROP_FRAME_WIDTH)? as i32;
-    let h: i32 = video.get(videoio::CAP_PROP_FRAME_HEIGHT)? as i32;
-    let mut out = VideoWriter::new("out.mp4",
-        VideoWriter::fourcc('m', 'p', '4', 'v')?, 30.,
-        core::Size_ { width: w, height: h }, true
-    )?;
+fn main() {
+    video::create("res/bateman.mp4", "no-audio.mp4", &(0..18).map(|x| x as f32 * 0.67).collect::<Vec<f32>>()).expect("Error in creating video.");
+    std::process::Command::new("rm").arg("output.mp4").output().unwrap();
+    println!("Adding audio...");
+    std::process::Command::new("ffmpeg").arg("-i").arg("no-audio.mp4").arg("-i").arg("res/metamorphosis.mp3").arg("-c:v").arg("copy").arg("-c:a").arg("aac").arg("-strict").arg("experimental")
+        .arg("-shortest").arg("output.mp4").output().expect("Failed to overlay audio.");
 
-    for _ in 0..100 {
-        let mut frame: Mat = Mat::default();
-        video.read(&mut frame)?;
+    println!("Cleaning up...");
+    std::process::Command::new("rm").arg("no-audio.mp4").output().unwrap();
 
-        out.write(&frame)?;
-    }
-
-    out.release()?;
-    std::process::Command::new("mpv").arg("out.mp4").output().expect("Failed to view output video.");
-
-    Ok(())
+    println!("Playing video...");
+    std::process::Command::new("mpv").arg("output.mp4").output().expect("Failed to view output video.");
 }
 
