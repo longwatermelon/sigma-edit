@@ -6,7 +6,7 @@ fn t(minute: i32, seconds: i32) -> f32 {
     minute as f32 + seconds as f32 / 60.
 }
 
-fn main() {
+fn produce_video(output_path: &str) {
     let songs: Vec<(&str, Vec<f32>)> = vec![
         ("res/metamorphosis.mp3", (0..18).map(|x| x as f32 * 0.67).collect()),
         ("res/neon-blade.mp3", vec![vec![0., 2.68], (1..18).map(|x| 2.68 + x as f32 * 0.633).collect()].into_iter().flatten().collect()),
@@ -28,15 +28,20 @@ fn main() {
               t(9, 0), t(9, 14)]
     ).expect("Error in creating video.");
 
-    std::process::Command::new("rm").arg("output.mp4").output().unwrap();
+    std::process::Command::new("rm").arg("output/*").output().unwrap();
+
     println!("Adding audio...");
     std::process::Command::new("ffmpeg").arg("-i").arg("no-audio.mp4").arg("-i").arg(song.0).arg("-c:v").arg("copy").arg("-c:a").arg("aac").arg("-strict").arg("experimental")
-        .arg("-shortest").arg("output.mp4").output().expect("Failed to overlay audio.");
+        .arg("-shortest").arg(output_path).output().expect("Failed to overlay audio.");
 
     println!("Cleaning up...");
     std::process::Command::new("rm").arg("no-audio.mp4").output().unwrap();
+}
 
-    println!("Playing video...");
-    std::process::Command::new("mpv").arg("output.mp4").output().expect("Failed to view output video.");
+fn main() {
+    for i in 0..5 {
+        println!("Producing video {}/5...", i + 1);
+        produce_video(format!("output/{}.mp4", i).as_str());
+    }
 }
 
