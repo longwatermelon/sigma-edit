@@ -5,7 +5,7 @@ use opencv::imgproc::{warp_affine, put_text};
 use rand::Rng;
 use std::io::{self, Write};
 
-pub fn create(input: &str, output: &str, beats: &[f32], cuts: &[f32]) -> Result<()> {
+pub fn create(input: &str, output: &str, beats: &[f32], cuts: &[f32], slow: bool) -> Result<()> {
     let mut video: VideoCapture = VideoCapture::from_file(input, videoio::CAP_ANY)?; // 0 is the default camera
     let w: i32 = video.get(videoio::CAP_PROP_FRAME_WIDTH)? as i32;
     let h: i32 = video.get(videoio::CAP_PROP_FRAME_HEIGHT)? as i32;
@@ -33,7 +33,7 @@ pub fn create(input: &str, output: &str, beats: &[f32], cuts: &[f32]) -> Result<
         print!("\r({}/{}) Writing beat interval {:.2} to {:.2}...", i, beats.len() - 1, beats[i - 1], beats[i]);
         io::stdout().flush().unwrap();
 
-        write_beat_interval(&mut out, &mut video, beats[i] - beats[i - 1], cuts, quote.clone(), rule_num)?;
+        write_beat_interval(&mut out, &mut video, beats[i] - beats[i - 1], cuts, quote.clone(), rule_num, slow)?;
     }
     println!();
 
@@ -61,7 +61,14 @@ fn shift(frame: &Mat, xshift: i32, yshift: i32) -> Mat {
     shifted_image
 }
 
-fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_len: f32, cuts: &[f32], quote: String, rule_number: i32) -> Result<()> {
+fn slow(video: &mut VideoCapture, begin: i32, i: i32, frames: i32) -> Result<Mat, opencv::Error> {
+    video.set(videoio::CAP_PROP_POS_FRAMES, begin as f64 + 2. * (1. / (1. + f64::exp(-1.5 * i as f64 / frames as f64)) + 0.5) * frames as f64)?;
+    let mut frame: Mat = Mat::default();
+    video.read(&mut frame)?;
+    Ok(frame)
+}
+
+fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_len: f32, cuts: &[f32], quote: String, rule_number: i32, slow_video: bool) -> Result<()> {
     let frames: i32 = (30. * beat_len) as i32;
     let total_frames: i32 = video.get(videoio::CAP_PROP_FRAME_COUNT)? as i32;
 
@@ -87,7 +94,12 @@ fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_
         let progress: f32 = i as f32 / frames as f32;
 
         let mut frame: Mat = Mat::default();
-        video.read(&mut frame)?;
+        if slow_video {
+            frame = slow(video, begin as i32, i, frames)?;
+        } else {
+            video.read(&mut frame)?;
+        }
+
         let mut adjusted: Mat = shift(&frame,
             (25. * f32::exp(-10. * progress) * f32::cos(1.5 * i as f32 + 0.5)) as i32,
             (25. * f32::exp(-10. * progress) * f32::sin(2. * i as f32)) as i32

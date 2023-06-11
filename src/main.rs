@@ -17,10 +17,13 @@ fn produce_video(output_path: &str) {
         ("res/mtg.mp3", (0..9).map(|x| x as f32 * 1.89).collect()),
         ("res/murder-in-my-mind.mp3", (0..35).map(|x| x as f32 * 0.4999999).collect()),
         ("res/immaculate.mp3", vec![(0..9).map(|x| x as f32 * 1.).collect::<Vec<f32>>(), (1..18).map(|x| 8. + x as f32 * 0.54).collect()].into_iter().flatten().collect()),
-        ("res/miss-you.mp3", vec![vec![0., 3.95], (0..34).map(|x| 3.95 + x as f32 * 0.42).collect()].into_iter().flatten().collect())
+        ("res/miss-you.mp3", vec![vec![0., 3.95], (0..34).map(|x| 3.95 + x as f32 * 0.4185).collect()].into_iter().flatten().collect())
     ];
     let song: (&str, Vec<f32>) = songs[rand::thread_rng().gen_range(0..songs.len())].clone();
     println!("Selected random song: {}", song.0);
+
+    let slow_video: bool = rand::thread_rng().gen_bool(0.5);
+    println!("Slow video: {}", slow_video);
 
     video::create("res/bateman.mp4", "no-audio.mp4", &song.1,
             &[t(0, 2), t(0, 7), t(0, 11), t(0, 16), t(0, 22), t(0, 24), t(0, 27), t(0, 30), t(0, 34),
@@ -31,7 +34,8 @@ fn produce_video(output_path: &str) {
               t(5, 0), t(5, 1), t(5, 2), t(5, 4), t(5, 8), t(5, 10), t(5, 11), t(5, 14), t(5, 17), t(5, 18), t(5, 21), t(5, 26), t(5, 29), t(5, 34), t(5, 41), t(5, 46), t(5, 51), t(5, 56),
               t(6, 0), t(6, 6), t(6, 10), t(6, 19), t(6, 57),
               t(8, 15), t(8, 20), t(8, 32), t(8, 37), t(8, 50), t(8, 52),
-              t(9, 0), t(9, 14)]
+              t(9, 0), t(9, 14)],
+              slow_video
     ).expect("Error in creating video.");
 
     println!("Adding audio...");
