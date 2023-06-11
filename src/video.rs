@@ -3,6 +3,7 @@ use opencv::videoio::{VideoCapture, VideoWriter};
 use opencv::core::{Scalar, Point};
 use opencv::imgproc::{warp_affine, put_text};
 use rand::Rng;
+use std::io::{self, Write};
 
 pub fn create(input: &str, output: &str, beats: &[f32], cuts: &[f32]) -> Result<()> {
     let mut video: VideoCapture = VideoCapture::from_file(input, videoio::CAP_ANY)?; // 0 is the default camera
@@ -29,9 +30,12 @@ pub fn create(input: &str, output: &str, beats: &[f32], cuts: &[f32]) -> Result<
     let rule_num: i32 = rand::thread_rng().gen_range(1..200);
 
     for i in 1..beats.len() {
-        println!("({}/{}) Writing beat interval {:.2} to {:.2}...", i, beats.len() - 1, beats[i - 1], beats[i]);
+        print!("\r({}/{}) Writing beat interval {:.2} to {:.2}...", i, beats.len() - 1, beats[i - 1], beats[i]);
+        io::stdout().flush().unwrap();
+
         write_beat_interval(&mut out, &mut video, beats[i] - beats[i - 1], cuts, quote.clone(), rule_num)?;
     }
+    println!();
 
     out.release()?;
     Ok(())
