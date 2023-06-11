@@ -16,10 +16,10 @@ fn produce_video(output_path: &str) {
         ("res/dancin.mp3", (0..34).map(|x| x as f32 * 0.53).collect()),
         ("res/mtg.mp3", (0..9).map(|x| x as f32 * 1.89).collect()),
         ("res/murder-in-my-mind.mp3", (0..35).map(|x| x as f32 * 0.4999999).collect()),
-        ("res/immaculate.mp3", vec![(0..9).map(|x| x as f32 * 1.).collect::<Vec<f32>>(), (1..18).map(|x| 8. + x as f32 * 0.52).collect()].into_iter().flatten().collect())
+        ("res/immaculate.mp3", vec![(0..9).map(|x| x as f32 * 1.).collect::<Vec<f32>>(), (1..18).map(|x| 8. + x as f32 * 0.54).collect()].into_iter().flatten().collect()),
+        ("res/miss-you.mp3", vec![vec![0., 3.95], (0..34).map(|x| 3.95 + x as f32 * 0.42).collect()].into_iter().flatten().collect())
     ];
-    // let song: (&str, Vec<f32>) = songs[rand::thread_rng().gen_range(0..songs.len())].clone();
-    let song = songs[5].clone();
+    let song: (&str, Vec<f32>) = songs[rand::thread_rng().gen_range(0..songs.len())].clone();
     println!("Selected random song: {}", song.0);
 
     video::create("res/bateman.mp4", "no-audio.mp4", &song.1,
