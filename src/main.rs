@@ -3,6 +3,7 @@ mod video;
 use rand::Rng;
 
 use std::fs;
+use std::process::exit;
 
 fn t(minute: i32, seconds: i32) -> f32 {
     minute as f32 + seconds as f32 / 60.
@@ -11,7 +12,7 @@ fn t(minute: i32, seconds: i32) -> f32 {
 fn produce_video(output_path: &str) {
     let songs: Vec<(&str, Vec<f32>)> = vec![
         ("res/metamorphosis.mp3", (0..18).map(|x| x as f32 * 0.67).collect()),
-        ("res/neon-blade.mp3", vec![vec![0., 2.68], (1..18).map(|x| 2.68 + x as f32 * 0.633).collect()].into_iter().flatten().collect()),
+        ("res/neon-blade.mp3", vec![vec![0., 2.68], (1..18).map(|x| 2.68 + x as f32 * 0.635).collect()].into_iter().flatten().collect()),
         ("res/dancin.mp3", (0..34).map(|x| x as f32 * 0.53).collect()),
         ("res/mtg.mp3", (0..9).map(|x| x as f32 * 1.89).collect())
     ];
@@ -39,8 +40,15 @@ fn produce_video(output_path: &str) {
 }
 
 fn main() {
-    fs::remove_dir_all("output").expect("Unable to remove contents of output/. Does the directory exist?");
-    fs::create_dir("output").expect("Unable to create output directory.");
+    if let Err(_) = fs::remove_dir_all("output") {
+        eprintln!("Unable to remove contents of output/. Does the directory exist?");
+        exit(1);
+    }
+
+    if let Err(_) = fs::create_dir("output") {
+        eprintln!("Unable to create output directory.");
+        exit(1);
+    }
 
     for i in 0..5 {
         println!("Producing video {}/5...", i + 1);
