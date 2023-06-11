@@ -24,7 +24,15 @@ pub fn create(input: &str, output: &str, beats: &[f32], cuts: &[f32], slow: bool
         "Silent strength, hidden potential.",
         "Society's labels don't define me.",
         "Reserved but self-assured.",
-        "Walk my own path, create my own rules."
+        "Walk my own path, create my own rules.",
+        "Don't trust anyone.",
+        "Ignore relationships.",
+        "I live life on my own terms.",
+        "I'm here to stand out, not fit in.",
+        "The less you care, the happier you'll be.",
+        "Don't be a follower.",
+        "The most powerful weapon is knowledge.",
+        "Observe, don't speak."
     ].iter().map(|x| x.to_string()).collect();
     let quote: String = quotes[rand::thread_rng().gen_range(0..quotes.len())].clone();
     let rule_num: i32 = rand::thread_rng().gen_range(1..200);

@@ -22,8 +22,9 @@ fn produce_video(output_path: &str) {
     let song: (&str, Vec<f32>) = songs[rand::thread_rng().gen_range(0..songs.len())].clone();
     println!("Selected random song: {}", song.0);
 
-    let slow_video: bool = rand::thread_rng().gen_bool(0.5);
-    println!("Slow video: {}", slow_video);
+    // let slow_video: bool = rand::thread_rng().gen_bool(0.5);
+    // println!("Slow video: {}", slow_video);
+    let slow_video: bool = false;
 
     video::create("res/bateman.mp4", "no-audio.mp4", &song.1,
             &[t(0, 2), t(0, 7), t(0, 11), t(0, 16), t(0, 22), t(0, 24), t(0, 27), t(0, 30), t(0, 34),
