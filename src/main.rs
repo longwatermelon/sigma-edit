@@ -14,7 +14,8 @@ fn produce_video(output_path: &str) {
         ("res/metamorphosis.mp3", (0..18).map(|x| x as f32 * 0.67).collect()),
         ("res/neon-blade.mp3", vec![vec![0., 2.68], (1..18).map(|x| 2.68 + x as f32 * 0.635).collect()].into_iter().flatten().collect()),
         ("res/dancin.mp3", (0..34).map(|x| x as f32 * 0.53).collect()),
-        ("res/mtg.mp3", (0..9).map(|x| x as f32 * 1.89).collect())
+        ("res/mtg.mp3", (0..9).map(|x| x as f32 * 1.89).collect()),
+        ("res/murder-in-my-mind.mp3", (0..35).map(|x| x as f32 * 0.4999999).collect())
     ];
     let song: (&str, Vec<f32>) = songs[rand::thread_rng().gen_range(0..songs.len())].clone();
     println!("Selected random song: {}", song.0);
@@ -40,6 +41,8 @@ fn produce_video(output_path: &str) {
 }
 
 fn main() {
+    let args: Vec<String> = std::env::args().skip(1).collect();
+
     if let Err(_) = fs::remove_dir_all("output") {
         eprintln!("Unable to remove contents of output/. Does the directory exist?");
         exit(1);
@@ -50,8 +53,9 @@ fn main() {
         exit(1);
     }
 
-    for i in 0..5 {
-        println!("Producing video {}/5...", i + 1);
+    let n: i32 = if args.is_empty() { 5 } else { args[0].parse().unwrap() };
+    for i in 0..n {
+        println!("Producing video {}/{}...", i + 1, n);
         produce_video(format!("output/{}.mp4", i).as_str());
     }
 }
