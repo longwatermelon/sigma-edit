@@ -2,6 +2,8 @@ mod video;
 
 use rand::Rng;
 
+use std::fs;
+
 fn t(minute: i32, seconds: i32) -> f32 {
     minute as f32 + seconds as f32 / 60.
 }
@@ -28,14 +30,15 @@ fn produce_video(output_path: &str) {
               t(9, 0), t(9, 14)]
     ).expect("Error in creating video.");
 
-    std::process::Command::new("rm").arg("output/*").output().unwrap();
+    fs::remove_dir_all("output").expect("Unable to remove contents of output/. Does the directory exist?");
+    fs::create_dir("output").expect("Unable to create output directory.");
 
     println!("Adding audio...");
     std::process::Command::new("ffmpeg").arg("-i").arg("no-audio.mp4").arg("-i").arg(song.0).arg("-c:v").arg("copy").arg("-c:a").arg("aac").arg("-strict").arg("experimental")
         .arg("-shortest").arg(output_path).output().expect("Failed to overlay audio.");
 
     println!("Cleaning up...");
-    std::process::Command::new("rm").arg("no-audio.mp4").output().unwrap();
+    fs::remove_file("no-audio.mp4").expect("Unable to remove no-audio.mp4.");
 }
 
 fn main() {
