@@ -1,20 +1,11 @@
 use crate::effects;
-use opencv::{prelude::*, core, videoio, Result};
+use opencv::{prelude::*, videoio, Result};
 use opencv::videoio::{VideoCapture, VideoWriter};
 use opencv::core::{Scalar, Point};
 use opencv::imgproc::put_text;
 use rand::Rng;
-use std::io::{self, Write};
 
-pub fn create(input: &str, output: &str, beats: &[f32], cuts: &[f32], slow: bool) -> Result<()> {
-    let mut video: VideoCapture = VideoCapture::from_file(input, videoio::CAP_ANY)?; // 0 is the default camera
-    let w: i32 = video.get(videoio::CAP_PROP_FRAME_WIDTH)? as i32;
-    let h: i32 = video.get(videoio::CAP_PROP_FRAME_HEIGHT)? as i32;
-    let mut out = VideoWriter::new(output,
-        VideoWriter::fourcc('m', 'p', '4', 'v')?, 30.,
-        core::Size_ { width: w, height: h }, true
-    )?;
-
+pub fn write(writer: &mut VideoWriter, video: &mut VideoCapture, beat_len: f32, cuts: &[f32], slow: bool) -> Result<()> {
     let quotes: Vec<String> = vec![
         "Lone wolf by choice.",
         "Be independent.",
@@ -38,18 +29,8 @@ pub fn create(input: &str, output: &str, beats: &[f32], cuts: &[f32], slow: bool
     let quote: String = quotes[rand::thread_rng().gen_range(0..quotes.len())].clone();
     let rule_num: i32 = rand::thread_rng().gen_range(1..200);
 
-    for i in 1..beats.len() {
-        print!("\r({}/{}) Writing beat interval {:.2} to {:.2}...", i, beats.len() - 1, beats[i - 1], beats[i]);
-        io::stdout().flush().unwrap();
-
-        write_beat_interval(&mut out, &mut video, beats[i] - beats[i - 1], cuts, quote.clone(), rule_num, slow)?;
-    }
-    println!();
-
-    out.release()?;
-    Ok(())
+    write_beat_interval(writer, video, beat_len, cuts, quote, rule_num, slow)
 }
-
 
 fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_len: f32, cuts: &[f32], quote: String, rule_number: i32, slow_video: bool) -> Result<()> {
     let frames: i32 = (30. * beat_len) as i32;

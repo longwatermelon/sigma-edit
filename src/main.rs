@@ -1,8 +1,8 @@
 mod effects;
 mod edit;
+mod video;
 
 use rand::Rng;
-
 use std::fs;
 use std::process::exit;
 
@@ -41,10 +41,10 @@ fn produce_edit(output_path: &str) {
     let song: (&str, Vec<f32>) = songs[rand::thread_rng().gen_range(0..songs.len())].clone();
     println!("Music: {}", song.0);
 
-    // let slow_video: bool = rand::thread_rng().gen_bool(0.5);
-    // println!("Slow video: {}", slow_video);
-    let slow_video: bool = false;
-    edit::create(video.0, "no-audio.mp4", &song.1, video.1.as_slice(), slow_video).expect("Error in creating video.");
+    video::create(video.0, "no-audio.mp4", &song.1, video::Config::Edit {
+        cuts: video.1.as_slice(),
+        slow: false
+    }).expect("Failed to create video.");
 
     println!("Adding audio...");
     std::process::Command::new("ffmpeg").arg("-i").arg("no-audio.mp4").arg("-i").arg(song.0).arg("-c:v").arg("copy").arg("-c:a").arg("aac").arg("-strict").arg("experimental")
