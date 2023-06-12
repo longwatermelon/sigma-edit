@@ -1,4 +1,4 @@
-mod video;
+mod edit;
 
 use rand::Rng;
 
@@ -9,7 +9,9 @@ fn t(minute: i32, seconds: i32) -> f32 {
     minute as f32 + seconds as f32 / 60.
 }
 
-fn produce_video(output_path: &str) {
+fn produce_edit(output_path: &str) {
+    println!("Video type: Edit");
+
     let videos: Vec<(&str, Vec<f32>)> = vec![
         ("res/bateman.mp4",
          vec![t(0, 2), t(0, 7), t(0, 11), t(0, 16), t(0, 22), t(0, 24), t(0, 27), t(0, 30), t(0, 34),
@@ -21,9 +23,7 @@ fn produce_video(output_path: &str) {
               t(6, 0), t(6, 6), t(6, 10), t(6, 19), t(6, 57),
               t(8, 15), t(8, 20), t(8, 32), t(8, 37), t(8, 50), t(8, 52),
               t(9, 0), t(9, 14)]),
-        ("res/peaky-blinders.mp4",
-         vec![
-         ])
+        ("res/peaky-blinders.mp4", Vec::new()) // Peaky blinders has less cuts so cuts vector isn't necessary
     ];
     let video: (&str, Vec<f32>) = videos[rand::thread_rng().gen_range(0..videos.len())].clone();
     println!("Selected random video: {}", video.0);
@@ -43,7 +43,7 @@ fn produce_video(output_path: &str) {
     // let slow_video: bool = rand::thread_rng().gen_bool(0.5);
     // println!("Slow video: {}", slow_video);
     let slow_video: bool = false;
-    video::create(video.0, "no-audio.mp4", &song.1, video.1.as_slice(), slow_video).expect("Error in creating video.");
+    edit::create(video.0, "no-audio.mp4", &song.1, video.1.as_slice(), slow_video).expect("Error in creating video.");
 
     println!("Adding audio...");
     std::process::Command::new("ffmpeg").arg("-i").arg("no-audio.mp4").arg("-i").arg(song.0).arg("-c:v").arg("copy").arg("-c:a").arg("aac").arg("-strict").arg("experimental")
@@ -68,8 +68,14 @@ fn main() {
 
     let n: i32 = if args.is_empty() { 5 } else { args[0].parse().unwrap() };
     for i in 0..n {
+        let choice: i32 = rand::thread_rng().gen_range(0..1);
+        let filename: String = format!("output/{}.mp4", i);
+
         println!("Producing video {}/{}...", i + 1, n);
-        produce_video(format!("output/{}.mp4", i).as_str());
+        match choice {
+            0 => produce_edit(filename.as_str()),
+            _ => ()
+        }
     }
 }
 
