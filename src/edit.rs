@@ -1,7 +1,8 @@
+use crate::effects;
 use opencv::{prelude::*, core, videoio, Result};
 use opencv::videoio::{VideoCapture, VideoWriter};
 use opencv::core::{Scalar, Point};
-use opencv::imgproc::{warp_affine, put_text};
+use opencv::imgproc::put_text;
 use rand::Rng;
 use std::io::{self, Write};
 
@@ -49,32 +50,6 @@ pub fn create(input: &str, output: &str, beats: &[f32], cuts: &[f32], slow: bool
     Ok(())
 }
 
-fn shift(frame: &Mat, xshift: i32, yshift: i32) -> Mat {
-    let shift_matrix = Mat::from_slice_2d(&[
-        &[1.0, 0.0, xshift as f64],
-        &[0.0, 1.0, yshift as f64]
-    ]).unwrap();
-
-    let mut shifted_image = frame.clone();
-    warp_affine(
-        frame,
-        &mut shifted_image,
-        &shift_matrix,
-        frame.size().unwrap(),
-        opencv::imgproc::INTER_LINEAR,
-        opencv::core::BORDER_CONSTANT,
-        Scalar::new(0., 0., 0., 0.),
-    ).unwrap();
-
-    shifted_image
-}
-
-fn slow(video: &mut VideoCapture, begin: i32, i: i32, frames: i32) -> Result<Mat, opencv::Error> {
-    video.set(videoio::CAP_PROP_POS_FRAMES, begin as f64 + 2. * (1. / (1. + f64::exp(-1.5 * i as f64 / frames as f64)) + 0.5) * frames as f64)?;
-    let mut frame: Mat = Mat::default();
-    video.read(&mut frame)?;
-    Ok(frame)
-}
 
 fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_len: f32, cuts: &[f32], quote: String, rule_number: i32, slow_video: bool) -> Result<()> {
     let frames: i32 = (30. * beat_len) as i32;
@@ -103,12 +78,12 @@ fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_
 
         let mut frame: Mat = Mat::default();
         if slow_video {
-            frame = slow(video, begin as i32, i, frames)?;
+            frame = effects::slow(video, begin as i32, i, frames)?;
         } else {
             video.read(&mut frame)?;
         }
 
-        let mut adjusted: Mat = shift(&frame,
+        let mut adjusted: Mat = effects::shift(&frame,
             (25. * f32::exp(-10. * progress) * f32::cos(1.5 * i as f32 + 0.5)) as i32,
             (25. * f32::exp(-10. * progress) * f32::sin(2. * i as f32)) as i32
         );

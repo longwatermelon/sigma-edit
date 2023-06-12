@@ -1,3 +1,4 @@
+mod effects;
 mod edit;
 
 use rand::Rng;
