@@ -19,7 +19,7 @@ fn main() {
         exit(1);
     }
 
-    let n: i32 = if args.is_empty() { 5 } else { args[0].parse().unwrap() };
+    let n: i32 = if args.is_empty() { 1 } else { args[0].parse().unwrap() };
     for i in 0..n {
         let choice: i32 = rand::thread_rng().gen_range(0..1);
         let filename: String = format!("output/{}.mp4", i);

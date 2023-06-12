@@ -1,11 +1,12 @@
 use crate::effects;
+use crate::video::print_progress;
 use opencv::{prelude::*, videoio, Result};
 use opencv::videoio::{VideoCapture, VideoWriter};
 use opencv::core::{Scalar, Point};
 use opencv::imgproc::put_text;
 use rand::Rng;
 
-pub fn write(writer: &mut VideoWriter, video: &mut VideoCapture, beat_len: f32, cuts: &[f32], slow: bool) -> Result<()> {
+pub fn create(writer: &mut VideoWriter, video: &mut VideoCapture, beats: &[f32], cuts: &[f32], slow: bool) -> Result<()> {
     let quotes: Vec<String> = vec![
         "Lone wolf by choice.",
         "Be independent.",
@@ -29,7 +30,12 @@ pub fn write(writer: &mut VideoWriter, video: &mut VideoCapture, beat_len: f32, 
     let quote: String = quotes[rand::thread_rng().gen_range(0..quotes.len())].clone();
     let rule_num: i32 = rand::thread_rng().gen_range(1..200);
 
-    write_beat_interval(writer, video, beat_len, cuts, quote, rule_num, slow)
+    for i in 1..beats.len() {
+        print_progress(i + 1, beats.len());
+        write_beat_interval(writer, video, beats[i] - beats[i - 1], cuts, quote.clone(), rule_num, slow)?;
+    }
+
+    Ok(())
 }
 
 fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_len: f32, cuts: &[f32], quote: String, rule_number: i32, slow_video: bool) -> Result<()> {
@@ -81,7 +87,7 @@ fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_
             &mut adjusted,
             text.as_str(),
             Point::new(x, y),
-            0,
+            opencv::imgproc::FONT_HERSHEY_COMPLEX,
             font_scale,
             Scalar::new(255., 255., 255., 0.),
             thickness,
