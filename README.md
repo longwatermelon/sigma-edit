@@ -21,3 +21,5 @@ mkdir output
 cargo r [number of output videos, default is 1]
 ```
 
+Configuration options
+* `rig-ties`: `true` to guarantee ties in character vs character videos, `false` for otherwise
