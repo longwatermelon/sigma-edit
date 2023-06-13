@@ -58,7 +58,7 @@ fn t(minute: i32, seconds: i32) -> f32 {
 
 fn random_song<'a>(options: &[&str]) -> Song<'a> {
     let songs: Vec<Song> = vec![
-        Song::new("res/audio/metamorphosis.mp3", vec![vec![0., 2.72], (1..35).map(|x| 2.72 + x as f32 * 0.66).collect()].into_iter().flatten().collect()),
+        Song::new("res/audio/metamorphosis.mp3", vec![vec![0., 2.72], (1..35).map(|x| 2.72 + x as f32 * 0.7).collect()].into_iter().flatten().collect()),
         Song::new("res/audio/neon-blade.mp3", vec![vec![0., 2.68], (1..18).map(|x| 2.68 + x as f32 * 0.635).collect()].into_iter().flatten().collect()),
         Song::new("res/audio/dancin.mp3", vec![vec![0., 3.55], (1..35).map(|x| 3.55 + x as f32 * 0.53).collect()].into_iter().flatten().collect()),
         Song::new("res/audio/mtg.mp3", (0..9).map(|x| x as f32 * 1.89).collect()),
