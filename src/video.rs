@@ -5,12 +5,14 @@ use rand::Rng;
 use std::{io, io::Write, fs};
 
 enum Config<'a> {
-    Edit{
+    Edit {
         input: &'a str,
         cuts: &'a [f32],
         slow: bool
     },
-    Compare
+    Compare {
+        rig_ties: bool
+    }
 }
 
 #[derive(Clone)]
@@ -117,7 +119,9 @@ fn produce_compare<'a>() -> &'a str {
     ]);
     println!("Music: {}", song.path);
 
-    create("no-audio.mp4", song.beats.as_slice(), Config::Compare).expect("Failed to create video.");
+    create("no-audio.mp4", song.beats.as_slice(), Config::Compare {
+        rig_ties: false
+    }).expect("Failed to create video.");
 
     song.path
 }
@@ -135,10 +139,11 @@ fn create(output: &str, beats: &[f32], cfg: Config) -> Result<()> {
 
     match cfg {
         Config::Edit { input, cuts, slow } => edit::create(&mut out, &mut VideoCapture::from_file(input, videoio::CAP_ANY)?, beats, cuts, slow)?,
-        Config::Compare => compare::create(&mut out, beats,
+        Config::Compare { rig_ties } => compare::create(&mut out, beats,
             VideoCapture::from_file("res/video/compare/combined.mp4", videoio::CAP_ANY).unwrap(),
             VideoCapture::from_file("res/video/compare/bateman.mp4", videoio::CAP_ANY).unwrap(),
-            VideoCapture::from_file("res/video/compare/shelby.mp4", videoio::CAP_ANY).unwrap()
+            VideoCapture::from_file("res/video/compare/shelby.mp4", videoio::CAP_ANY).unwrap(),
+            rig_ties
         )?
     }
 
