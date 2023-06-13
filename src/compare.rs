@@ -34,11 +34,16 @@ fn random_skill<'a>(skills: &mut Vec<&'a str>) -> &'a str {
     skill
 }
 
-fn random_skill_from_two<'a>(skill_vectors: &mut [Vec<&'a str>], names: &[&'a str]) -> (&'a str, &'a str) {
-    loop {
-        let i: usize = rand::thread_rng().gen_range(0..skill_vectors.len());
-        if !skill_vectors[i].is_empty() {
-            return (random_skill(&mut skill_vectors[i]), names[i]);
+fn random_skill_from_two<'a>(skills_a: &mut Vec<&'a str>, skills_b: &mut Vec<&'a str>, person_a: &'a str, person_b: &'a str) -> (&'a str, &'a str) {
+    if skills_a.is_empty() {
+        (random_skill(skills_b), person_b)
+    } else if skills_b.is_empty() {
+        (random_skill(skills_a), person_a)
+    } else {
+        if rand::thread_rng().gen_bool(0.5) {
+            (random_skill(skills_a), person_a)
+        } else {
+            (random_skill(skills_b), person_b)
         }
     }
 }
@@ -55,19 +60,12 @@ pub fn create(writer: &mut VideoWriter, beats: &[f32], mut combined: VideoCaptur
         "SKILL", "WEAPONS", "POWER", "COMBAT", "STAMINA", "FEATS", "DEFENSE"
     ];
 
-    let mut bateman_skills: Vec<&str> = Vec::new();
-    let mut shelby_skills: Vec<&str> = Vec::new();
+    let mut skills_a: Vec<&str> = Vec::new();
+    let mut skills_b: Vec<&str> = Vec::new();
     for _ in 0..(skills.len() / 2) {
-        bateman_skills.push(random_skill(&mut skills));
-        shelby_skills.push(random_skill(&mut skills));
+        skills_a.push(random_skill(&mut skills));
+        skills_b.push(random_skill(&mut skills));
     }
-
-    let mut skill_vectors: [Vec<&str>; 2] = [
-        bateman_skills,
-        shelby_skills
-    ];
-
-    let names: [&str; 2] = [person_a, person_b];
 
     for i in 1..beats.len() {
         print_progress(i + 1, beats.len());
@@ -81,7 +79,7 @@ pub fn create(writer: &mut VideoWriter, beats: &[f32], mut combined: VideoCaptur
 
         topic = match topic {
             Topic::Intro {..} => {
-                let (skill, name) = random_skill_from_two(&mut skill_vectors, &names);
+                let (skill, name) = random_skill_from_two(&mut skills_a, &mut skills_b, person_a, person_b);
                 Topic::Skill { person: name, name: skill }
             },
             Topic::Skill { person, .. } => {
@@ -93,10 +91,10 @@ pub fn create(writer: &mut VideoWriter, beats: &[f32], mut combined: VideoCaptur
 
                 Topic::Better { person, score_a, score_b }
             },
-            Topic::Better {..} => if i >= beats.len() - 5 || (skill_vectors[0].is_empty() && skill_vectors[1].is_empty()) {
+            Topic::Better {..} => if skills_a.is_empty() && skills_b.is_empty() {
                 Topic::Winner { person: if score_a > score_b { person_a } else if score_a < score_b { person_b } else { "TIE" } }
             } else {
-                let (skill, name) = random_skill_from_two(&mut skill_vectors, &names);
+                let (skill, name) = random_skill_from_two(&mut skills_a, &mut skills_b, person_a, person_b);
                 Topic::Skill { person: name, name: skill }
             },
             Topic::Winner {..} => topic
