@@ -39,8 +39,8 @@ pub fn create(writer: &mut VideoWriter, beats: &[f32], mut combined: VideoCaptur
 
     let mut topic: Topic = Topic::Intro { person_a, person_b };
     let mut skills: Vec<&str> = vec![
-        "IQ", "BATTLE IQ", "AGILITY", "STRENGTH", "ENDURANCE", "SPEED", "EXPERIENCE",
-        "TECH", "SKILL", "INTELLIGENCE", "WEAPONS", "FREE POINT"
+        "IQ", "BATTLE IQ", "AGILITY", "STRENGTH", "ENDURANCE", "DURABILITY", "SPEED", "EXPERIENCE",
+        "TECH", "SKILL", "INTELLIGENCE", "WEAPONS", "POWER", "FREE POINT", "KNOWLEDGE"
     ];
 
     for i in 1..beats.len() {
