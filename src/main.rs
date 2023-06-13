@@ -1,8 +1,8 @@
 mod effects;
 mod edit;
+mod compare;
 mod video;
 
-use rand::Rng;
 use std::fs;
 use std::process::exit;
 
@@ -21,14 +21,9 @@ fn main() {
 
     let n: i32 = if args.is_empty() { 1 } else { args[0].parse().unwrap() };
     for i in 0..n {
-        let choice: i32 = rand::thread_rng().gen_range(0..1);
-        let filename: String = format!("output/{}.mp4", i);
-
         println!("Producing video {}/{}...", i + 1, n);
-        match choice {
-            0 => video::produce_edit(filename.as_str()),
-            _ => ()
-        }
+        let filename: String = format!("output/{}.mp4", i);
+        video::produce(filename.as_str());
     }
 }
 

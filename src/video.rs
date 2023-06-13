@@ -1,4 +1,4 @@
-use crate::edit;
+use crate::{edit, compare};
 use opencv::{prelude::*, core, videoio, Result};
 use opencv::videoio::{VideoCapture, VideoWriter};
 use rand::Rng;
@@ -6,9 +6,11 @@ use std::{io, io::Write, fs};
 
 enum Config<'a> {
     Edit{
+        input: &'a str,
         cuts: &'a [f32],
         slow: bool
-    }
+    },
+    Compare
 }
 
 #[derive(Clone)]
@@ -35,19 +37,34 @@ impl<'a> Video<'a> {
     }
 }
 
+pub fn produce(output_path: &str) {
+    let song_path: &str = match rand::thread_rng().gen_range(0..2) {
+        0 => produce_edit(),
+        1 => produce_compare(),
+        _ => unreachable!()
+    };
+
+    println!("Adding audio...");
+    std::process::Command::new("ffmpeg").arg("-i").arg("no-audio.mp4").arg("-i").arg(song_path).arg("-c:v").arg("copy").arg("-c:a").arg("aac").arg("-strict").arg("experimental")
+        .arg("-shortest").arg(output_path).output().expect("Failed to overlay audio.");
+
+    println!("Cleaning up...");
+    fs::remove_file("no-audio.mp4").expect("Unable to remove no-audio.mp4.");
+}
+
 fn t(minute: i32, seconds: i32) -> f32 {
     minute as f32 + seconds as f32 / 60.
 }
 
 fn random_song<'a>(options: &[&str]) -> Song<'a> {
     let songs: Vec<Song> = vec![
-        Song::new("res/audio/metamorphosis.mp3", (0..18).map(|x| x as f32 * 0.67).collect()),
+        Song::new("res/audio/metamorphosis.mp3", vec![vec![0., 2.79], (1..19).map(|x| 2.79 + x as f32 * 0.67).collect()].into_iter().flatten().collect()),
         Song::new("res/audio/neon-blade.mp3", vec![vec![0., 2.68], (1..18).map(|x| 2.68 + x as f32 * 0.635).collect()].into_iter().flatten().collect()),
         Song::new("res/audio/dancin.mp3", (0..34).map(|x| x as f32 * 0.53).collect()),
         Song::new("res/audio/mtg.mp3", (0..9).map(|x| x as f32 * 1.89).collect()),
         Song::new("res/audio/murder-in-my-mind.mp3", (0..35).map(|x| x as f32 * 0.4999999).collect()),
         Song::new("res/audio/immaculate.mp3", vec![(0..9).map(|x| x as f32 * 1.).collect::<Vec<f32>>(), (1..18).map(|x| 8. + x as f32 * 0.54).collect()].into_iter().flatten().collect()),
-        Song::new("res/audio/miss-you.mp3", vec![vec![0., 3.95], (0..34).map(|x| 3.95 + x as f32 * 0.43332).collect()].into_iter().flatten().collect())
+        Song::new("res/audio/miss-you.mp3", vec![vec![0., 3.95], (1..35).map(|x| 3.95 + x as f32 * 0.43332).collect()].into_iter().flatten().collect())
     ];
 
     loop {
@@ -59,7 +76,7 @@ fn random_song<'a>(options: &[&str]) -> Song<'a> {
     }
 }
 
-pub fn produce_edit(output_path: &str) {
+fn produce_edit<'a>() -> &'a str {
     println!("Video type: Edit");
 
     let videos: Vec<Video> = vec![
@@ -81,17 +98,28 @@ pub fn produce_edit(output_path: &str) {
     let song: Song = random_song(&[]);
     println!("Music: {}", song.path);
 
-    create(video.path, "no-audio.mp4", song.beats.as_slice(), Config::Edit {
+    create("no-audio.mp4", song.beats.as_slice(), Config::Edit {
+        input: video.path,
         cuts: video.cuts.as_slice(),
         slow: false
     }).expect("Failed to create video.");
 
-    println!("Adding audio...");
-    std::process::Command::new("ffmpeg").arg("-i").arg("no-audio.mp4").arg("-i").arg(song.path).arg("-c:v").arg("copy").arg("-c:a").arg("aac").arg("-strict").arg("experimental")
-        .arg("-shortest").arg(output_path).output().expect("Failed to overlay audio.");
+    song.path
+}
 
-    println!("Cleaning up...");
-    fs::remove_file("no-audio.mp4").expect("Unable to remove no-audio.mp4.");
+fn produce_compare<'a>() -> &'a str {
+    println!("Video type: Comparison");
+
+    let song: Song = random_song(&[
+        "res/audio/dancin.mp3",
+        "res/audio/metamorphosis.mp3",
+        "res/audio/miss-you.mp3"
+    ]);
+    println!("Music: {}", song.path);
+
+    create("no-audio.mp4", song.beats.as_slice(), Config::Compare).expect("Failed to create video.");
+
+    song.path
 }
 
 pub fn print_progress(beat_index: usize, nbeats: usize) {
@@ -99,17 +127,19 @@ pub fn print_progress(beat_index: usize, nbeats: usize) {
     io::stdout().flush().unwrap();
 }
 
-fn create(input: &str, output: &str, beats: &[f32], cfg: Config) -> Result<()> {
-    let mut video: VideoCapture = VideoCapture::from_file(input, videoio::CAP_ANY)?; // 0 is the default camera
-    let w: i32 = video.get(videoio::CAP_PROP_FRAME_WIDTH)? as i32;
-    let h: i32 = video.get(videoio::CAP_PROP_FRAME_HEIGHT)? as i32;
+fn create(output: &str, beats: &[f32], cfg: Config) -> Result<()> {
     let mut out = VideoWriter::new(output,
         VideoWriter::fourcc('m', 'p', '4', 'v')?, 30.,
-        core::Size_ { width: w, height: h }, true
+        core::Size_ { width: 1080, height: 1920 }, true
     )?;
 
     match cfg {
-        Config::Edit { cuts, slow } => edit::create(&mut out, &mut video, beats, cuts, slow)?
+        Config::Edit { input, cuts, slow } => edit::create(&mut out, &mut VideoCapture::from_file(input, videoio::CAP_ANY)?, beats, cuts, slow)?,
+        Config::Compare => compare::create(&mut out, beats,
+            VideoCapture::from_file("res/video/compare/combined.mp4", videoio::CAP_ANY).unwrap(),
+            VideoCapture::from_file("res/video/compare/bateman.mp4", videoio::CAP_ANY).unwrap(),
+            VideoCapture::from_file("res/video/compare/shelby.mp4", videoio::CAP_ANY).unwrap()
+        )?
     }
 
     out.release()?;

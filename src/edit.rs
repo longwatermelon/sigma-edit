@@ -34,6 +34,7 @@ pub fn create(writer: &mut VideoWriter, video: &mut VideoCapture, beats: &[f32],
         print_progress(i + 1, beats.len());
         write_beat_interval(writer, video, beats[i] - beats[i - 1], cuts, quote.clone(), rule_num, slow)?;
     }
+    println!();
 
     Ok(())
 }
