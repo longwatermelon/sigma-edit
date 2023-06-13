@@ -69,7 +69,7 @@ pub fn create(writer: &mut VideoWriter, beats: &[f32], mut combined: VideoCaptur
             } else {
                 Topic::Skill { name: get_skill(&mut skills) }
             },
-            Topic::Winner {..} => break
+            Topic::Winner {..} => topic
         };
     }
     println!();
@@ -78,7 +78,9 @@ pub fn create(writer: &mut VideoWriter, beats: &[f32], mut combined: VideoCaptur
 }
 
 fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_len: f32, topic: Topic) -> Result<()> {
-    video.set(videoio::CAP_PROP_POS_FRAMES, 0.)?;
+    if !matches!(topic, Topic::Winner {..}) {
+        video.set(videoio::CAP_PROP_POS_FRAMES, 0.)?;
+    }
     let frames: usize = (30. * beat_len) as usize;
 
     for i in 0..frames {
@@ -87,10 +89,14 @@ fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_
         let mut frame: Mat = Mat::default();
         video.read(&mut frame)?;
 
-        let mut adjusted: Mat = effects::shift(&frame,
-            (25. * f32::exp(-10. * progress) * f32::cos(1.5 * i as f32 + 0.5)) as i32,
-            (25. * f32::exp(-10. * progress) * f32::sin(2. * i as f32)) as i32
-        );
+        let mut adjusted: Mat = frame.clone();
+
+        if !matches!(topic, Topic::Winner {..}) {
+            adjusted = effects::shift(&frame,
+                (25. * f32::exp(-10. * progress) * f32::cos(1.5 * i as f32 + 0.5)) as i32,
+                (25. * f32::exp(-10. * progress) * f32::sin(2. * i as f32)) as i32
+            );
+        }
 
         let text: String = match topic {
             Topic::Intro { person_a, person_b } => format!("{}\nVS\n{}", person_a, person_b),
