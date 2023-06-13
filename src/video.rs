@@ -2,7 +2,7 @@ use crate::{edit, compare};
 use opencv::{prelude::*, core, videoio, Result};
 use opencv::videoio::{VideoCapture, VideoWriter};
 use rand::Rng;
-use std::{io, io::Write, fs};
+use std::{io, io::{Read, Write}, fs, fs::File};
 
 enum Config<'a> {
     Edit {
@@ -40,9 +40,14 @@ impl<'a> Video<'a> {
 }
 
 pub fn produce(output_path: &str) {
+    let mut file = File::open("config/config.json").expect("Failed to read config.");
+    let mut contents: String = String::new();
+    file.read_to_string(&mut contents).unwrap();
+    let cfg: serde_json::Value = serde_json::from_str(&contents).expect("Failed to parse json.");
+
     let song_path: &str = match rand::thread_rng().gen_range(0..2) {
         0 => produce_edit(),
-        1 => produce_compare(),
+        1 => produce_compare(&cfg),
         _ => unreachable!()
     };
 
@@ -109,7 +114,7 @@ fn produce_edit<'a>() -> &'a str {
     song.path
 }
 
-fn produce_compare<'a>() -> &'a str {
+fn produce_compare<'a>(cfg: &serde_json::Value) -> &'a str {
     println!("Video type: Comparison");
 
     let song: Song = random_song(&[
@@ -119,8 +124,11 @@ fn produce_compare<'a>() -> &'a str {
     ]);
     println!("Music: {}", song.path);
 
+    let rig_ties: bool = cfg["rig-ties"].as_bool().unwrap_or(false);
+    println!("Tie rigging: {}", rig_ties);
+
     create("no-audio.mp4", song.beats.as_slice(), Config::Compare {
-        rig_ties: false
+        rig_ties
     }).expect("Failed to create video.");
 
     song.path
