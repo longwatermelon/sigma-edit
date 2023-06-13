@@ -13,6 +13,8 @@ enum Topic<'a> {
         person_b: &'a str
     },
     Skill {
+        // Used to rig ties
+        person: &'a str,
         name: &'a str
     },
     Better {
@@ -25,10 +27,20 @@ enum Topic<'a> {
     }
 }
 
-fn get_skill<'a>(skills: &mut Vec<&'a str>) -> &'a str {
-    let skill: &str = skills[0];
-    skills.remove(0);
+fn random_skill<'a>(skills: &mut Vec<&'a str>) -> &'a str {
+    let index: usize = rand::thread_rng().gen_range(0..skills.len());
+    let skill: &str = skills[index];
+    skills.remove(index);
     skill
+}
+
+fn random_skill_from_two<'a>(skill_vectors: &mut [Vec<&'a str>], names: &[&'a str]) -> (&'a str, &'a str) {
+    loop {
+        let i: usize = rand::thread_rng().gen_range(0..skill_vectors.len());
+        if !skill_vectors[i].is_empty() {
+            return (random_skill(&mut skill_vectors[i]), names[i]);
+        }
+    }
 }
 
 pub fn create(writer: &mut VideoWriter, beats: &[f32], mut combined: VideoCapture, mut big_a: VideoCapture, mut big_b: VideoCapture) -> Result<()> {
@@ -39,9 +51,23 @@ pub fn create(writer: &mut VideoWriter, beats: &[f32], mut combined: VideoCaptur
 
     let mut topic: Topic = Topic::Intro { person_a, person_b };
     let mut skills: Vec<&str> = vec![
-        "IQ", "BATTLE IQ", "AGILITY", "STRENGTH", "ENDURANCE", "DURABILITY", "SPEED", "EXPERIENCE",
-        "TECH", "SKILL", "INTELLIGENCE", "WEAPONS", "POWER", "KNOWLEDGE", "FREE POINT"
+        "IQ", "BATTLE IQ", "AGILITY", "STRENGTH", "ENDURANCE", "SPEED", "EXPERIENCE",
+        "SKILL", "WEAPONS", "POWER", "COMBAT", "STAMINA", "FEATS", "DEFENSE"
     ];
+
+    let mut bateman_skills: Vec<&str> = Vec::new();
+    let mut shelby_skills: Vec<&str> = Vec::new();
+    for _ in 0..(skills.len() / 2) {
+        bateman_skills.push(random_skill(&mut skills));
+        shelby_skills.push(random_skill(&mut skills));
+    }
+
+    let mut skill_vectors: [Vec<&str>; 2] = [
+        bateman_skills,
+        shelby_skills
+    ];
+
+    let names: [&str; 2] = [person_a, person_b];
 
     for i in 1..beats.len() {
         print_progress(i + 1, beats.len());
@@ -49,14 +75,16 @@ pub fn create(writer: &mut VideoWriter, beats: &[f32], mut combined: VideoCaptur
             Topic::Intro {..} |
             Topic::Skill {..} => &mut combined,
             Topic::Better { person, .. } |
-            Topic::Winner { person } => if person == person_a { &mut big_a } else { &mut big_b }
+            Topic::Winner { person } => if person == person_a { &mut big_a } else if person == person_b { &mut big_b } else { &mut combined }
         };
         write_beat_interval(writer, video, beats[i] - beats[i - 1], topic.clone())?;
 
         topic = match topic {
-            Topic::Intro {..} => Topic::Skill { name: get_skill(&mut skills) },
-            Topic::Skill {..} => {
-                let person: &str = if rand::thread_rng().gen_bool(0.5) { person_a } else { person_b };
+            Topic::Intro {..} => {
+                let (skill, name) = random_skill_from_two(&mut skill_vectors, &names);
+                Topic::Skill { person: name, name: skill }
+            },
+            Topic::Skill { person, .. } => {
                 if person == person_a {
                     score_a += 1;
                 } else {
@@ -65,10 +93,11 @@ pub fn create(writer: &mut VideoWriter, beats: &[f32], mut combined: VideoCaptur
 
                 Topic::Better { person, score_a, score_b }
             },
-            Topic::Better {..} => if i >= beats.len() - 5 || skills.is_empty() {
+            Topic::Better {..} => if i >= beats.len() - 5 || (skill_vectors[0].is_empty() && skill_vectors[1].is_empty()) {
                 Topic::Winner { person: if score_a > score_b { person_a } else if score_a < score_b { person_b } else { "TIE" } }
             } else {
-                Topic::Skill { name: get_skill(&mut skills) }
+                let (skill, name) = random_skill_from_two(&mut skill_vectors, &names);
+                Topic::Skill { person: name, name: skill }
             },
             Topic::Winner {..} => topic
         };
@@ -101,7 +130,7 @@ fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_
 
         let text: String = match topic {
             Topic::Intro { person_a, person_b } => format!("{}\nVS\n{}", person_a, person_b),
-            Topic::Skill { name } => name.to_string(),
+            Topic::Skill { person: _, name } => name.to_string(),
             Topic::Better { person: _, score_a, score_b } => format!("{}-{}", score_a, score_b),
             Topic::Winner { person } => if person == "TIE" { "TIE".to_string()  } else { format!("{} wins", person) }
         };
