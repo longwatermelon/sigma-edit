@@ -16,6 +16,7 @@ enum Topic<'a> {
         name: &'a str
     },
     Better {
+        person: &'a str,
         score_a: i32,
         score_b: i32
     },
@@ -47,7 +48,7 @@ pub fn create(writer: &mut VideoWriter, beats: &[f32], mut combined: VideoCaptur
         let video: &mut VideoCapture = match topic {
             Topic::Intro {..} |
             Topic::Skill {..} => &mut combined,
-            Topic::Better { score_a, score_b } => if score_a > score_b { &mut big_a } else { &mut big_b },
+            Topic::Better { person, .. } |
             Topic::Winner { person } => if person == person_a { &mut big_a } else { &mut big_b }
         };
         write_beat_interval(writer, video, beats[i] - beats[i - 1], topic.clone())?;
@@ -62,7 +63,7 @@ pub fn create(writer: &mut VideoWriter, beats: &[f32], mut combined: VideoCaptur
                     score_b += 1;
                 }
 
-                Topic::Better { score_a, score_b }
+                Topic::Better { person, score_a, score_b }
             },
             Topic::Better {..} => if i >= beats.len() - 5 || skills.is_empty() {
                 Topic::Winner { person: if score_a > score_b { person_a } else if score_a < score_b { person_b } else { "TIE" } }
@@ -101,7 +102,7 @@ fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_
         let text: String = match topic {
             Topic::Intro { person_a, person_b } => format!("{}\nVS\n{}", person_a, person_b),
             Topic::Skill { name } => name.to_string(),
-            Topic::Better { score_a, score_b } => format!("{}-{}", score_a, score_b),
+            Topic::Better { person: _, score_a, score_b } => format!("{}-{}", score_a, score_b),
             Topic::Winner { person } => if person == "TIE" { "TIE".to_string()  } else { format!("{} wins", person) }
         };
 
