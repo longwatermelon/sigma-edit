@@ -64,7 +64,7 @@ fn random_song<'a>(options: &[&str]) -> Song<'a> {
         Song::new("res/audio/mtg.mp3", (0..9).map(|x| x as f32 * 1.89).collect()),
         Song::new("res/audio/murder-in-my-mind.mp3", (0..35).map(|x| x as f32 * 0.4999999).collect()),
         Song::new("res/audio/immaculate.mp3", vec![(0..9).map(|x| x as f32 * 1.).collect::<Vec<f32>>(), (1..18).map(|x| 8. + x as f32 * 0.54).collect()].into_iter().flatten().collect()),
-        Song::new("res/audio/miss-you.mp3", vec![vec![0., 3.95], (1..35).map(|x| 3.95 + x as f32 * 0.43332).collect()].into_iter().flatten().collect())
+        Song::new("res/audio/miss-you.mp3", vec![vec![0., 3.95], (1..35).map(|x| 3.95 + x as f32 * 0.433333).collect()].into_iter().flatten().collect())
     ];
 
     loop {
