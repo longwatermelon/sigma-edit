@@ -2,7 +2,7 @@ use crate::{edit, compare};
 use opencv::{prelude::*, core, videoio};
 use opencv::videoio::{VideoCapture, VideoWriter};
 use rand::Rng;
-use std::{io, io::{Read, Write}, fs, fs::File};
+use std::{io::Read, fs, fs::File};
 
 enum Config<'a> {
     Edit {
@@ -142,10 +142,7 @@ fn produce_compare<'a>(cfg: &serde_json::Value) -> &'a str {
     song.path
 }
 
-pub fn print_progress(beat_index: usize, nbeats: usize) {
-    print!("\rWriting beat interval {}/{}...", beat_index, nbeats);
-    io::stdout().flush().unwrap();
-}
+
 
 fn create(output: &str, beats: &[f32], cfg: Config) -> opencv::Result<()> {
     let mut out = VideoWriter::new(output,

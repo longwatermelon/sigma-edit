@@ -1,3 +1,4 @@
+mod common;
 mod effects;
 mod edit;
 mod compare;

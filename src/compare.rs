@@ -1,5 +1,5 @@
 use crate::effects;
-use crate::video::print_progress;
+use crate::common::print_progress;
 use opencv::{prelude::*, videoio};
 use opencv::videoio::{VideoCapture, VideoWriter};
 use rand::Rng;
