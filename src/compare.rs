@@ -1,6 +1,6 @@
 use crate::effects;
 use crate::video::print_progress;
-use opencv::{prelude::*, videoio, Result};
+use opencv::{prelude::*, videoio};
 use opencv::videoio::{VideoCapture, VideoWriter};
 use opencv::core::{Scalar, Point};
 use opencv::imgproc::put_text;
@@ -48,7 +48,7 @@ fn random_skill_from_two<'a>(skills_a: &mut Vec<&'a str>, skills_b: &mut Vec<&'a
     }
 }
 
-pub fn create(writer: &mut VideoWriter, beats: &[f32], mut combined: VideoCapture, mut big_a: VideoCapture, mut big_b: VideoCapture, rig_ties: bool, probability: f32) -> Result<()> {
+pub fn create(writer: &mut VideoWriter, beats: &[f32], mut combined: VideoCapture, mut big_a: VideoCapture, mut big_b: VideoCapture, rig_ties: bool, probability: f32) -> opencv::Result<()> {
     let person_a: &str = "Patrick Bateman";
     let person_b: &str = "Thomas Shelby";
     let mut score_a: i32 = 0;
@@ -116,7 +116,7 @@ pub fn create(writer: &mut VideoWriter, beats: &[f32], mut combined: VideoCaptur
     Ok(())
 }
 
-fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_len: f32, topic: Topic) -> Result<()> {
+fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_len: f32, topic: Topic) -> opencv::Result<()> {
     if !matches!(topic, Topic::Winner {..}) {
         video.set(videoio::CAP_PROP_POS_FRAMES, 0.)?;
     }
