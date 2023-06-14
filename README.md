@@ -22,4 +22,5 @@ cargo r [number of output videos, default is 1]
 ```
 
 Configuration options
-* `rig-ties`: `true` to guarantee ties in character vs character videos, `false` for otherwise
+* `rig-ties`: `true` to guarantee ties in character vs character videos, `false` for otherwise. Defaults to `false`.
+* `probability`: A value of > 0.5 will give the first character a higher chance of winning, and a value of < 0.5 gives the second character a higher chance of winning. Defaults to 0.5.
