@@ -1,4 +1,4 @@
-use opencv::{prelude::*, videoio, Result};
+use opencv::{prelude::*, videoio};
 use opencv::videoio::VideoCapture;
 use opencv::core::Scalar;
 use opencv::imgproc::warp_affine;
@@ -23,7 +23,7 @@ pub fn shift(frame: &Mat, xshift: i32, yshift: i32) -> Mat {
     shifted_image
 }
 
-pub fn slow(video: &mut VideoCapture, begin: i32, i: i32, frames: i32) -> Result<Mat, opencv::Error> {
+pub fn slow(video: &mut VideoCapture, begin: i32, i: i32, frames: i32) -> opencv::Result<Mat> {
     video.set(videoio::CAP_PROP_POS_FRAMES, begin as f64 + 2. * (1. / (1. + f64::exp(-1.5 * i as f64 / frames as f64)) + 0.5) * frames as f64)?;
     let mut frame: Mat = Mat::default();
     video.read(&mut frame)?;

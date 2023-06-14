@@ -1,3 +1,4 @@
 {
-    "rig-ties": true
+    "rig-ties": false,
+    "probability": 0.25
 }

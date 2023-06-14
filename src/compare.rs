@@ -48,7 +48,7 @@ fn random_skill_from_two<'a>(skills_a: &mut Vec<&'a str>, skills_b: &mut Vec<&'a
     }
 }
 
-pub fn create(writer: &mut VideoWriter, beats: &[f32], mut combined: VideoCapture, mut big_a: VideoCapture, mut big_b: VideoCapture, rig_ties: bool) -> Result<()> {
+pub fn create(writer: &mut VideoWriter, beats: &[f32], mut combined: VideoCapture, mut big_a: VideoCapture, mut big_b: VideoCapture, rig_ties: bool, probability: f32) -> Result<()> {
     let person_a: &str = "Patrick Bateman";
     let person_b: &str = "Thomas Shelby";
     let mut score_a: i32 = 0;
@@ -70,7 +70,7 @@ pub fn create(writer: &mut VideoWriter, beats: &[f32], mut combined: VideoCaptur
         }
     } else {
         for _ in 0..skills.len() {
-            if rand::thread_rng().gen_bool(0.5) {
+            if rand::thread_rng().gen_bool(probability as f64) {
                 skills_a.push(random_skill(&mut skills));
             } else {
                 skills_b.push(random_skill(&mut skills));

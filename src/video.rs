@@ -1,5 +1,5 @@
 use crate::{edit, compare};
-use opencv::{prelude::*, core, videoio, Result};
+use opencv::{prelude::*, core, videoio};
 use opencv::videoio::{VideoCapture, VideoWriter};
 use rand::Rng;
 use std::{io, io::{Read, Write}, fs, fs::File};
@@ -11,7 +11,8 @@ enum Config<'a> {
         slow: bool
     },
     Compare {
-        rig_ties: bool
+        rig_ties: bool,
+        probability: f32
     }
 }
 
@@ -127,8 +128,15 @@ fn produce_compare<'a>(cfg: &serde_json::Value) -> &'a str {
     let rig_ties: bool = cfg["rig-ties"].as_bool().unwrap_or(false);
     println!("Tie rigging: {}", rig_ties);
 
+    let probability: f32 = cfg["probability"].as_f64().unwrap_or(0.5) as f32;
+    if !rig_ties {
+        println!("Probability: {:.2}", probability);
+    } else {
+        println!("Probability: Not applicable");
+    }
+
     create("no-audio.mp4", song.beats.as_slice(), Config::Compare {
-        rig_ties
+        rig_ties, probability
     }).expect("Failed to create video.");
 
     song.path
@@ -139,7 +147,7 @@ pub fn print_progress(beat_index: usize, nbeats: usize) {
     io::stdout().flush().unwrap();
 }
 
-fn create(output: &str, beats: &[f32], cfg: Config) -> Result<()> {
+fn create(output: &str, beats: &[f32], cfg: Config) -> opencv::Result<()> {
     let mut out = VideoWriter::new(output,
         VideoWriter::fourcc('m', 'p', '4', 'v')?, 30.,
         core::Size_ { width: 1080, height: 1920 }, true
@@ -147,11 +155,11 @@ fn create(output: &str, beats: &[f32], cfg: Config) -> Result<()> {
 
     match cfg {
         Config::Edit { input, cuts, slow } => edit::create(&mut out, &mut VideoCapture::from_file(input, videoio::CAP_ANY)?, beats, cuts, slow)?,
-        Config::Compare { rig_ties } => compare::create(&mut out, beats,
+        Config::Compare { rig_ties, probability } => compare::create(&mut out, beats,
             VideoCapture::from_file("res/video/compare/combined.mp4", videoio::CAP_ANY).unwrap(),
             VideoCapture::from_file("res/video/compare/bateman.mp4", videoio::CAP_ANY).unwrap(),
             VideoCapture::from_file("res/video/compare/shelby.mp4", videoio::CAP_ANY).unwrap(),
-            rig_ties
+            rig_ties, probability
         )?
     }
 

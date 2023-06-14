@@ -1,12 +1,12 @@
 use crate::effects;
 use crate::video::print_progress;
-use opencv::{prelude::*, videoio, Result};
+use opencv::{prelude::*, videoio};
 use opencv::videoio::{VideoCapture, VideoWriter};
 use opencv::core::{Scalar, Point};
 use opencv::imgproc::put_text;
 use rand::Rng;
 
-pub fn create(writer: &mut VideoWriter, video: &mut VideoCapture, beats: &[f32], cuts: &[f32], slow: bool) -> Result<()> {
+pub fn create(writer: &mut VideoWriter, video: &mut VideoCapture, beats: &[f32], cuts: &[f32], slow: bool) -> opencv::Result<()> {
     let quotes: Vec<String> = vec![
         "Lone wolf by choice.",
         "Be independent.",
@@ -39,7 +39,7 @@ pub fn create(writer: &mut VideoWriter, video: &mut VideoCapture, beats: &[f32],
     Ok(())
 }
 
-fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_len: f32, cuts: &[f32], quote: String, rule_number: i32, slow_video: bool) -> Result<()> {
+fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_len: f32, cuts: &[f32], quote: String, rule_number: i32, slow_video: bool) -> opencv::Result<()> {
     let frames: i32 = (30. * beat_len) as i32;
     let total_frames: i32 = video.get(videoio::CAP_PROP_FRAME_COUNT)? as i32;
 
