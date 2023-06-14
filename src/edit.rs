@@ -2,8 +2,6 @@ use crate::effects;
 use crate::video::print_progress;
 use opencv::{prelude::*, videoio};
 use opencv::videoio::{VideoCapture, VideoWriter};
-use opencv::core::{Scalar, Point};
-use opencv::imgproc::put_text;
 use rand::Rng;
 
 pub fn create(writer: &mut VideoWriter, video: &mut VideoCapture, beats: &[f32], cuts: &[f32], slow: bool) -> opencv::Result<()> {
@@ -77,24 +75,7 @@ fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_
         );
 
         let text: String = format!("Sigma Rule #{}: {}", rule_number, quote);
-        let font_scale = 1.;
-        let thickness = 3;
-        let text_size = opencv::imgproc::get_text_size(text.as_str(), 0, font_scale, thickness, &mut 0)?;
-
-        let x = (frame.cols() - text_size.width) / 2;
-        let y = (frame.rows() - text_size.height) / 2;
-
-        put_text(
-            &mut adjusted,
-            text.as_str(),
-            Point::new(x, y),
-            opencv::imgproc::FONT_HERSHEY_COMPLEX,
-            font_scale,
-            Scalar::new(255., 255., 255., 0.),
-            thickness,
-            0,
-            false
-        )?;
+        effects::draw_text(&mut adjusted, text.as_str(), None, None, 1., 3)?;
 
         writer.write(&adjusted)?;
     }

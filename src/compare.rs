@@ -2,8 +2,6 @@ use crate::effects;
 use crate::video::print_progress;
 use opencv::{prelude::*, videoio};
 use opencv::videoio::{VideoCapture, VideoWriter};
-use opencv::core::{Scalar, Point};
-use opencv::imgproc::put_text;
 use rand::Rng;
 
 #[derive(Clone)]
@@ -144,41 +142,10 @@ fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_
             Topic::Winner { person } => if person == "TIE" { "TIE".to_string()  } else { format!("{} wins", person) }
         };
 
-        let mut start_y: i32 = -20;
+        let mut y: i32 = -20;
         for line in text.split('\n') {
-            let font_scale = 2.;
-            let thickness = 3;
-            let font = opencv::imgproc::FONT_HERSHEY_COMPLEX;
-            let linetype = opencv::imgproc::LINE_AA;
-            let text_size = opencv::imgproc::get_text_size(line, font, font_scale, thickness, &mut 0)?;
-
-            let x = (frame.cols() - text_size.width) / 2;
-            let y = start_y + (frame.rows() - text_size.height) / 2;
-            start_y += text_size.height + 10;
-
-            put_text(
-                &mut adjusted,
-                line,
-                Point::new(x - 1, y),
-                font,
-                font_scale,
-                Scalar::new(0., 0., 0., 0.),
-                thickness + 2,
-                linetype,
-                false
-            )?;
-
-            put_text(
-                &mut adjusted,
-                line,
-                Point::new(x, y),
-                font,
-                font_scale,
-                Scalar::new(255., 255., 255., 0.),
-                thickness,
-                linetype,
-                false
-            )?;
+            y += 50;
+            effects::draw_text(&mut adjusted, line, None, Some(y), 2., 3)?;
         }
 
 
