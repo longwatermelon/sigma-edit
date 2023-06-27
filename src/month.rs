@@ -59,8 +59,8 @@ fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_
             effects::draw_text(&mut adjusted, "Your Birthday Month", None, Some(-50), 2.5, 3)?;
             effects::draw_text(&mut adjusted, "Your Sigma", None, Some(50), 2.5, 3)?;
         } else {
-            effects::draw_text(&mut adjusted, month, None, Some(-700), 2.5, 3)?;
-            effects::draw_text(&mut adjusted, name, None, None, 2.5, 3)?;
+            effects::draw_text(&mut adjusted, month, None, None, 2.5, 3)?;
+            effects::draw_text(&mut adjusted, name, None, Some(100), 2.5, 3)?;
         }
 
         writer.write(&adjusted)?;
