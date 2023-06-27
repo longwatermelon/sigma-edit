@@ -1,4 +1,4 @@
-use crate::{edit, compare};
+use crate::{edit, compare, month};
 use opencv::{prelude::*, core, videoio};
 use opencv::videoio::{VideoCapture, VideoWriter};
 use rand::Rng;
@@ -13,7 +13,8 @@ enum Config<'a> {
     Compare {
         rig_ties: bool,
         probability: f32
-    }
+    },
+    Month
 }
 
 #[derive(Clone)]
@@ -46,9 +47,10 @@ pub fn produce(output_path: &str) {
     file.read_to_string(&mut contents).unwrap();
     let cfg: serde_json::Value = serde_json::from_str(&contents).expect("Failed to parse json.");
 
-    let song_path: &str = match rand::thread_rng().gen_range(0..2) {
+    let song_path: &str = match rand::thread_rng().gen_range(0..3) {
         0 => produce_edit(),
         1 => produce_compare(&cfg),
+        2 => produce_month(),
         _ => unreachable!()
     };
 
@@ -58,6 +60,27 @@ pub fn produce(output_path: &str) {
 
     println!("Cleaning up...");
     fs::remove_file("no-audio.mp4").expect("Unable to remove no-audio.mp4.");
+}
+
+fn create(output: &str, beats: &[f32], cfg: Config) -> opencv::Result<()> {
+    let mut out = VideoWriter::new(output,
+        VideoWriter::fourcc('m', 'p', '4', 'v')?, 30.,
+        core::Size_ { width: 1080, height: 1920 }, true
+    )?;
+
+    match cfg {
+        Config::Edit { input, cuts, slow } => edit::create(&mut out, &mut VideoCapture::from_file(input, videoio::CAP_ANY)?, beats, cuts, slow)?,
+        Config::Compare { rig_ties, probability } => compare::create(&mut out, beats,
+            VideoCapture::from_file("res/video/compare/combined.mp4", videoio::CAP_ANY)?,
+            VideoCapture::from_file("res/video/compare/bateman.mp4", videoio::CAP_ANY)?,
+            VideoCapture::from_file("res/video/compare/shelby.mp4", videoio::CAP_ANY)?,
+            rig_ties, probability
+        )?,
+        Config::Month => month::create(&mut out, beats)?
+    }
+
+    out.release()?;
+    Ok(())
 }
 
 fn t(minute: i32, seconds: i32) -> f32 {
@@ -142,25 +165,17 @@ fn produce_compare<'a>(cfg: &serde_json::Value) -> &'a str {
     song.path
 }
 
+fn produce_month<'a>() -> &'a str {
+    println!("Video type: Month");
 
+    let song: Song = random_song(&[
+        "res/audio/dancin.mp3",
+        "res/audio/metamorphosis.mp3",
+        "res/audio/miss-you.mp3"
+    ]);
+    println!("Music: {}", song.path);
 
-fn create(output: &str, beats: &[f32], cfg: Config) -> opencv::Result<()> {
-    let mut out = VideoWriter::new(output,
-        VideoWriter::fourcc('m', 'p', '4', 'v')?, 30.,
-        core::Size_ { width: 1080, height: 1920 }, true
-    )?;
-
-    match cfg {
-        Config::Edit { input, cuts, slow } => edit::create(&mut out, &mut VideoCapture::from_file(input, videoio::CAP_ANY)?, beats, cuts, slow)?,
-        Config::Compare { rig_ties, probability } => compare::create(&mut out, beats,
-            VideoCapture::from_file("res/video/compare/combined.mp4", videoio::CAP_ANY).unwrap(),
-            VideoCapture::from_file("res/video/compare/bateman.mp4", videoio::CAP_ANY).unwrap(),
-            VideoCapture::from_file("res/video/compare/shelby.mp4", videoio::CAP_ANY).unwrap(),
-            rig_ties, probability
-        )?
-    }
-
-    out.release()?;
-    Ok(())
+    create("no-audio.mp4", song.beats.as_slice(), Config::Month).expect("Failed to create video.");
+    song.path
 }
 

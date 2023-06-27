@@ -2,6 +2,7 @@ mod common;
 mod effects;
 mod edit;
 mod compare;
+mod month;
 mod video;
 
 use std::fs;
