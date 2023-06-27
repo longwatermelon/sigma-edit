@@ -6,8 +6,8 @@ use rand::Rng;
 
 pub fn create(writer: &mut VideoWriter, beats: &[f32]) -> opencv::Result<()> {
     let months: &[&str] = &["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    let mut sigmas: Vec<&str> = vec!["bateman", "batman", "gus", "homelander", "joker", "kratos", "nerd", "rickgrimes", "shelby", "tylerdurden", "walter", "wick"];
-    let mut names: Vec<&str> = vec!["Patrick Bateman", "Batman", "Gus", "Homelander", "Joker", "Kratos", "Nerd", "Rick Grimes", "Tommy Shelby", "Tyler Durden", "Walter White", "John Wick"];
+    let mut sigmas: Vec<&str> = vec!["bateman", "batman", "gus", "homelander", "joker", "kratos", "chad", "rickgrimes", "shelby", "tylerdurden", "walter", "wick"];
+    let mut names: Vec<&str> = vec!["Patrick Bateman", "Batman", "Gus", "Homelander", "Joker", "Kratos", "Gigachad", "Rick Grimes", "Tommy Shelby", "Tyler Durden", "Walter White", "John Wick"];
     let mut counter: usize = 0;
 
     let mut name: &str = "";
@@ -26,6 +26,8 @@ pub fn create(writer: &mut VideoWriter, beats: &[f32]) -> opencv::Result<()> {
             let index: usize = rand::thread_rng().gen_range(0..sigmas.len());
             let sigma: &str = sigmas[index];
             name = names[index];
+
+            println!("{}", sigma);
 
             video = VideoCapture::from_file(format!("res/video/month/{}.mp4", sigma).as_str(), videoio::CAP_ANY)?;
             sigmas.remove(index);
