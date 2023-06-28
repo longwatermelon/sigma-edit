@@ -27,8 +27,6 @@ pub fn create(writer: &mut VideoWriter, beats: &[f32]) -> opencv::Result<()> {
             let sigma: &str = sigmas[index];
             name = names[index];
 
-            println!("{}", sigma);
-
             video = VideoCapture::from_file(format!("res/video/month/{}.mp4", sigma).as_str(), videoio::CAP_ANY)?;
             sigmas.remove(index);
             names.remove(index);
