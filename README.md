@@ -15,6 +15,12 @@ https://github.com/longwatermelon/sigma-edit/assets/73869536/dc671bb2-bdb9-4c11-
 https://github.com/longwatermelon/sigma-edit/assets/73869536/a535aa70-1ee6-4d5d-b5ba-730f23f7e367
 </details>
 
+<details>
+<summary>Month example (audio on)</summary>
+  
+https://github.com/longwatermelon/sigma-edit/assets/73869536/6846316a-9836-4e3e-a3cf-5dd62ea19120
+</details>
+
 # Usage
 ```
 mkdir output
