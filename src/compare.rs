@@ -148,7 +148,6 @@ fn write_beat_interval(writer: &mut VideoWriter, video: &mut VideoCapture, beat_
             effects::draw_text(&mut adjusted, line, None, Some(y), 2., 3)?;
         }
 
-
         writer.write(&adjusted)?;
     }
 
