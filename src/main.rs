@@ -1,9 +1,9 @@
 mod common;
 mod effects;
+mod video;
 mod edit;
 mod compare;
 mod month;
-mod video;
 
 use rand::Rng;
 use std::fs;
@@ -45,7 +45,7 @@ fn main() {
             }
         }
 
-        let audios: Vec<String> = (0..6).map(|_| {
+        let audios: Vec<String> = (0..8).map(|_| {
             let index: usize = rand::thread_rng().gen_range(0..paths.len());
             paths.remove(index)
         }).collect();
@@ -57,6 +57,11 @@ fn main() {
         audio_info.insert("res/compilation/override.mp3", ("Override by KSLV", "https://youtu.be/NS8DPG62Fto"));
         audio_info.insert("res/compilation/rave.mp3", ("Rave by Dxrk ダーク", "https://youtu.be/PTZgxW_3LIQ"));
         audio_info.insert("res/compilation/sahara.mp3", ("Sahara by Hensonn", "https://youtu.be/pIZ0QRWK0zg"));
+        audio_info.insert("res/compilation/scopin.mp3", ("Scopin by Kordhell", "https://youtu.be/VXaq77GiyEo"));
+        audio_info.insert("res/compilation/gigachad.mp3", ("Gigachad Theme (Phonk House Version) by g3ox_em", "https://youtu.be/OVh0bMNSFss"));
+        audio_info.insert("res/compilation/immaculate.mp3", ("IMMACULATE by VISXGE", "https://youtu.be/6dz481Zv3KQ"));
+        audio_info.insert("res/compilation/neon-blade.mp3", ("NEON BLADE by MoonDeity", "https://youtu.be/dvQJIgjlR3I"));
+        audio_info.insert("res/compilation/disaster.mp3", ("Disaster by KSLV", "https://youtu.be/Pnq1_3BXIqA"));
 
         let mut desc: String = String::new();
         let mut timestamp: u64 = 0;
