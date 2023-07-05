@@ -45,23 +45,25 @@ fn main() {
             }
         }
 
-        let audios: Vec<String> = (0..8).map(|_| {
+        let audios: Vec<String> = (0..2).map(|_| {
             let index: usize = rand::thread_rng().gen_range(0..paths.len());
             paths.remove(index)
         }).collect();
 
         let mut audio_info: HashMap<&str, (&str, &str)> = HashMap::new();
-        audio_info.insert("res/compilation/callme.mp3", ("Call Me by plenka", "https://youtu.be/1aAY7EI3u8c"));
-        audio_info.insert("res/compilation/live-another-day.mp3", ("Live Another Day by Kordhell", "https://youtu.be/7pmUQJ5KAlU"));
-        audio_info.insert("res/compilation/metamorphosis.mp3", ("METAMORPHOSIS by INTERWORLD", "https://youtu.be/lJvRohYSrZM"));
-        audio_info.insert("res/compilation/override.mp3", ("Override by KSLV", "https://youtu.be/NS8DPG62Fto"));
-        audio_info.insert("res/compilation/rave.mp3", ("Rave by Dxrk ダーク", "https://youtu.be/PTZgxW_3LIQ"));
-        audio_info.insert("res/compilation/sahara.mp3", ("Sahara by Hensonn", "https://youtu.be/pIZ0QRWK0zg"));
-        audio_info.insert("res/compilation/scopin.mp3", ("Scopin by Kordhell", "https://youtu.be/VXaq77GiyEo"));
-        audio_info.insert("res/compilation/gigachad.mp3", ("Gigachad Theme (Phonk House Version) by g3ox_em", "https://youtu.be/OVh0bMNSFss"));
-        audio_info.insert("res/compilation/immaculate.mp3", ("IMMACULATE by VISXGE", "https://youtu.be/6dz481Zv3KQ"));
-        audio_info.insert("res/compilation/neon-blade.mp3", ("NEON BLADE by MoonDeity", "https://youtu.be/dvQJIgjlR3I"));
-        audio_info.insert("res/compilation/disaster.mp3", ("Disaster by KSLV", "https://youtu.be/Pnq1_3BXIqA"));
+        audio_info.insert("res/compilation/callme.mp3", ("Call Me", "https://youtu.be/1aAY7EI3u8c"));
+        audio_info.insert("res/compilation/live-another-day.mp3", ("Live Another Day", "https://youtu.be/7pmUQJ5KAlU"));
+        audio_info.insert("res/compilation/metamorphosis.mp3", ("METAMORPHOSIS", "https://youtu.be/lJvRohYSrZM"));
+        audio_info.insert("res/compilation/override.mp3", ("Override", "https://youtu.be/NS8DPG62Fto"));
+        audio_info.insert("res/compilation/rave.mp3", ("Rave", "https://youtu.be/PTZgxW_3LIQ"));
+        audio_info.insert("res/compilation/sahara.mp3", ("Sahara", "https://youtu.be/pIZ0QRWK0zg"));
+        audio_info.insert("res/compilation/scopin.mp3", ("Scopin", "https://youtu.be/VXaq77GiyEo"));
+        audio_info.insert("res/compilation/gigachad.mp3", ("Gigachad Theme (Phonk House Version)", "https://youtu.be/OVh0bMNSFss"));
+        audio_info.insert("res/compilation/immaculate.mp3", ("IMMACULATE", "https://youtu.be/6dz481Zv3KQ"));
+        audio_info.insert("res/compilation/neon-blade.mp3", ("NEON BLADE", "https://youtu.be/dvQJIgjlR3I"));
+        audio_info.insert("res/compilation/disaster.mp3", ("Disaster", "https://youtu.be/Pnq1_3BXIqA"));
+        audio_info.insert("res/compilation/cthulhu.mp3", ("CTHULU", "https://youtu.be/QnoiWy3e0mA"));
+        audio_info.insert("res/compilation/rapture.mp3", ("RAPTURE (sped up)", "https://youtu.be/OZRQMYkjE58"));
 
         let mut desc: String = String::new();
         let mut timestamp: u64 = 0;
