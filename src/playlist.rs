@@ -1,7 +1,4 @@
 use rand::Rng;
-// use opencv::videoio::VideoWriter;
-// use opencv::core;
-// use hound::WavReader;
 use std::fs;
 use std::process::Command;
 use std::collections::HashMap;
@@ -10,8 +7,6 @@ const LAST_BG: i32 = 1;
 const TRACK_NUM: i32 = 6;
 
 pub fn create() {
-    // video(&[String::from("res/compilation/callme.wav")], "test").unwrap();
-
     let paths_iter = fs::read_dir("res/compilation").unwrap();
     let mut paths: Vec<String> = Vec::new();
     for path in paths_iter {
@@ -65,7 +60,7 @@ pub fn create() {
         ffmpeg_cmd.push_str(format!(" -i {}", audio).as_str());
     }
 
-    ffmpeg_cmd.push_str(format!(" -filter_complex \"[0:a][1:a]concat=n={}:v=0:a=1\" audio.wav", audios.len()).as_str());
+    ffmpeg_cmd.push_str(format!(" -filter_complex \"[0:a][1:a]concat=n={}:v=0:a=1\" output/audio.wav", audios.len()).as_str());
     ffmpeg_cmd.push_str(format!(
         " && ffmpeg -loop 1 -i res/compilation/backgrounds/{}.png -i audio.wav -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest output/0.mp4",
         rand::thread_rng().gen_range(0..=LAST_BG)
@@ -79,22 +74,5 @@ pub fn create() {
     Command::new("sh").args(["-c", ffmpeg_cmd.as_str()]).output().unwrap();
 
     println!("Done");
-    fs::remove_file("audio.wav").ok();
 }
-
-// fn video(audio_paths: &[String], output_path: &str) -> opencv::Result<()> {
-    // let mut out: VideoWriter = VideoWriter::new(output_path,
-    //     VideoWriter::fourcc('m', 'p', '4', 'v')?, 30.,
-    //     core::Size_ { width: 1920, height: 1080 }, true
-    // )?;
-
-    // for path in audio_paths {
-    //     let reader = WavReader::open(path).unwrap();
-    //     let samples = reader.into_samples::<i16>();
-
-    //     println!("{}", samples.count());
-    // }
-
-    // Ok(())
-// }
 
