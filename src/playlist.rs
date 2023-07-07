@@ -4,7 +4,7 @@ use std::process::Command;
 use std::collections::HashMap;
 
 const LAST_BG: i32 = 1;
-const TRACK_NUM: i32 = 6;
+const TRACK_NUM: i32 = 5;
 
 pub fn create() {
     let paths_iter = fs::read_dir("res/compilation").unwrap();
@@ -50,24 +50,22 @@ pub fn create() {
     }
 
     println!("Audios: {:?}", audios);
-    println!("Description:\n============\nTIMESTAMPS\n{}============", desc);
+    fs::write("output/desc", desc).unwrap();
 
     let mut ffmpeg_cmd: String = String::from("ffmpeg");
     for audio in &audios {
         ffmpeg_cmd.push_str(format!(" -i {}", audio).as_str());
     }
 
-    ffmpeg_cmd.push_str(format!(" -filter_complex \"[0:a][1:a]concat=n={}:v=0:a=1\" output/audio.mp3", audios.len()).as_str());
-    ffmpeg_cmd.push_str(format!(
-        " && ffmpeg -loop 1 -i res/compilation/backgrounds/{}.png -i audio.mp3 -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest output/0.mp4",
-        rand::thread_rng().gen_range(0..=LAST_BG)
-    ).as_str());
-
     println!("Concat audios...");
+    ffmpeg_cmd.push_str(format!(" -filter_complex \"[0:a][1:a]concat=n={}:v=0:a=1\" output/audio.mp3", audios.len()).as_str());
     Command::new("sh").args(["-c", ffmpeg_cmd.as_str()]).output().unwrap();
 
     println!("Overlay image...");
-    ffmpeg_cmd = String::from("ffmpeg -loop 1 -i res/compilation/backgrounds/0.png -i audio.mp3 -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest output/0.mp4");
+    ffmpeg_cmd = format!(
+        "ffmpeg -loop 1 -i res/compilation/backgrounds/{}.png -i output/audio.mp3 -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest output/0.mp4",
+        rand::thread_rng().gen_range(0..=LAST_BG)
+    );
     Command::new("sh").args(["-c", ffmpeg_cmd.as_str()]).output().unwrap();
 
     println!("Done");
