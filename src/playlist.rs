@@ -3,7 +3,7 @@ use std::fs;
 use std::process::Command;
 use std::collections::HashMap;
 
-const LAST_BG: i32 = 1;
+const LAST_BG: i32 = 2;
 const TRACK_NUM: i32 = 5;
 
 pub fn create() {
