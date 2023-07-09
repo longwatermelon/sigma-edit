@@ -3,22 +3,69 @@ use std::fs;
 use std::process::Command;
 use std::collections::HashMap;
 
-const LAST_BG: i32 = 2;
-const TRACK_NUM: i32 = 5;
+const LAST_BG: usize = 2;
+const TRACK_NUM: usize = 9;
+
+#[derive(Clone, Copy, Debug)]
+enum PlaylistType {
+    Generic,
+    Underground,
+    Sad,
+    Hardcore,
+}
 
 pub fn create() {
-    let paths_iter = fs::read_dir("res/compilation").unwrap();
-    let mut paths: Vec<String> = Vec::new();
-    for path in paths_iter {
-        let p = path.unwrap().path();
-        if p.is_file() && p.extension().unwrap() == "mp3" {
-            paths.push(p.to_str().unwrap().to_string());
-        }
-    }
+    // let paths_iter = fs::read_dir("res/compilation").unwrap();
+    // let mut paths: Vec<String> = Vec::new();
+    // for path in paths_iter {
+    //     let p = path.unwrap().path();
+    //     if p.is_file() && p.extension().unwrap() == "mp3" {
+    //         paths.push(p.to_str().unwrap().to_string());
+    //     }
+    // }
 
-    let audios: Vec<String> = (0..TRACK_NUM).map(|_| {
-        let index: usize = rand::thread_rng().gen_range(0..paths.len());
-        paths.remove(index)
+    let ptype: PlaylistType = [
+        PlaylistType::Sad,
+        PlaylistType::Generic,
+        PlaylistType::Hardcore,
+        PlaylistType::Underground
+    ][rand::thread_rng().gen_range(0..4)];
+
+    println!("Playlist type: {:?}", ptype);
+
+    let mut audios_full: Vec<String> = match ptype {
+        PlaylistType::Sad => vec![
+            "res/compilation/callme.mp3",
+        ],
+        PlaylistType::Generic => vec![
+            "res/compilation/metamorphosis.mp3",
+            "res/compilation/gigachad.mp3",
+            "res/compilation/rave.mp3",
+            "res/compilation/sahara.mp3",
+            "res/compilation/scopin.mp3",
+            "res/compilation/neon-blade.mp3",
+            "res/compilation/immaculate.mp3",
+            "res/compilation/disaster.mp3",
+            "res/compilation/callme.mp3",
+        ],
+        PlaylistType::Hardcore => vec![
+            "res/compilation/cthulhu.mp3",
+            "res/compilation/damage.mp3",
+            "res/compilation/mybad.mp3",
+            "res/compilation/live-another-day.mp3",
+            "res/compilation/rapture.mp3",
+            "res/compilation/override.mp3",
+        ],
+        PlaylistType::Underground => vec![
+            "res/compilation/cthulhu.mp3",
+            "res/compilation/mybad.mp3",
+            "res/compilation/damage.mp3",
+        ],
+    }.iter().map(|x| x.to_string()).collect();
+
+    let audios: Vec<String> = (0..usize::min(TRACK_NUM, audios_full.len())).map(|_| {
+        let index: usize = rand::thread_rng().gen_range(0..audios_full.len());
+        audios_full.remove(index)
     }).collect();
 
     let mut audio_info: HashMap<&str, (&str, &str)> = HashMap::new();
@@ -35,6 +82,8 @@ pub fn create() {
     audio_info.insert("res/compilation/disaster.mp3", ("Disaster", "https://youtu.be/Pnq1_3BXIqA"));
     audio_info.insert("res/compilation/cthulhu.mp3", ("CTHULU", "https://youtu.be/QnoiWy3e0mA"));
     audio_info.insert("res/compilation/rapture.mp3", ("RAPTURE (sped up)", "https://youtu.be/OZRQMYkjE58"));
+    audio_info.insert("res/compilation/mybad.mp3", ("MYBAD!", "https://youtu.be/TVqF_jVtgA8"));
+    audio_info.insert("res/compilation/damage.mp3", ("DAMAGE!", "https://youtu.be/OyTK6Q5s8es"));
 
     let mut desc: String = String::new();
     let mut timestamp: u64 = 0;
