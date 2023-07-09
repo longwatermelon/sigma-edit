@@ -3,39 +3,36 @@ use std::fs;
 use std::process::Command;
 use std::collections::HashMap;
 
-const LAST_BG: usize = 2;
+const LAST_BG: usize = 3;
 const TRACK_NUM: usize = 9;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 enum PlaylistType {
     Generic,
-    Underground,
     Sad,
     Hardcore,
 }
 
 pub fn create() {
-    // let paths_iter = fs::read_dir("res/compilation").unwrap();
-    // let mut paths: Vec<String> = Vec::new();
-    // for path in paths_iter {
-    //     let p = path.unwrap().path();
-    //     if p.is_file() && p.extension().unwrap() == "mp3" {
-    //         paths.push(p.to_str().unwrap().to_string());
-    //     }
-    // }
-
+    // Rare sad playlist
     let ptype: PlaylistType = [
         PlaylistType::Sad,
         PlaylistType::Generic,
+        PlaylistType::Generic,
         PlaylistType::Hardcore,
-        PlaylistType::Underground
-    ][rand::thread_rng().gen_range(0..4)];
+        PlaylistType::Hardcore,
+    ][rand::thread_rng().gen_range(0..5)];
 
     println!("Playlist type: {:?}", ptype);
 
     let mut audios_full: Vec<String> = match ptype {
         PlaylistType::Sad => vec![
             "res/compilation/callme.mp3",
+            "res/compilation/snowfall.mp3",
+            "res/compilation/drowning.mp3",
+            "res/compilation/livinglife.mp3",
+            "res/compilation/gravity.mp3",
+            "res/compilation/shootout.mp3",
         ],
         PlaylistType::Generic => vec![
             "res/compilation/metamorphosis.mp3",
@@ -47,6 +44,7 @@ pub fn create() {
             "res/compilation/immaculate.mp3",
             "res/compilation/disaster.mp3",
             "res/compilation/callme.mp3",
+            "res/compilation/courage.mp3",
         ],
         PlaylistType::Hardcore => vec![
             "res/compilation/cthulhu.mp3",
@@ -55,11 +53,7 @@ pub fn create() {
             "res/compilation/live-another-day.mp3",
             "res/compilation/rapture.mp3",
             "res/compilation/override.mp3",
-        ],
-        PlaylistType::Underground => vec![
-            "res/compilation/cthulhu.mp3",
-            "res/compilation/mybad.mp3",
-            "res/compilation/damage.mp3",
+            "res/compilation/templar.mp3",
         ],
     }.iter().map(|x| x.to_string()).collect();
 
@@ -84,6 +78,13 @@ pub fn create() {
     audio_info.insert("res/compilation/rapture.mp3", ("RAPTURE (sped up)", "https://youtu.be/OZRQMYkjE58"));
     audio_info.insert("res/compilation/mybad.mp3", ("MYBAD!", "https://youtu.be/TVqF_jVtgA8"));
     audio_info.insert("res/compilation/damage.mp3", ("DAMAGE!", "https://youtu.be/OyTK6Q5s8es"));
+    audio_info.insert("res/compilation/snowfall.mp3", ("snowfall", "https://youtu.be/U1m46getoEw"));
+    audio_info.insert("res/compilation/drowning.mp3", ("drowning", "https://youtu.be/plffo_TlTYQ"));
+    audio_info.insert("res/compilation/livinglife.mp3", ("Living Life, In The Night", "https://youtu.be/IZoxUQH1fXM"));
+    audio_info.insert("res/compilation/courage.mp3", ("COURAGE", "https://youtu.be/5y_A6IBgMrQ"));
+    audio_info.insert("res/compilation/gravity.mp3", ("Gravity", "https://youtu.be/BmhL89jG53s"));
+    audio_info.insert("res/compilation/shootout.mp3", ("Shootout", "https://youtu.be/eIoZxhBKA7c"));
+    audio_info.insert("res/compilation/templar.mp3", ("TEMPLAR", "https://youtu.be/qQqQvJTYdfg"));
 
     let mut desc: String = String::new();
     let mut timestamp: u64 = 0;
@@ -113,7 +114,7 @@ pub fn create() {
     println!("Overlay image...");
     ffmpeg_cmd = format!(
         "ffmpeg -loop 1 -i res/compilation/backgrounds/{}.png -i output/audio.mp3 -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest output/0.mp4",
-        rand::thread_rng().gen_range(0..=LAST_BG)
+        if ptype == PlaylistType::Sad { "sad".to_string() } else { rand::thread_rng().gen_range(0..=LAST_BG).to_string() }
     );
     Command::new("sh").args(["-c", ffmpeg_cmd.as_str()]).output().unwrap();
 
