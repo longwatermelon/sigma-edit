@@ -3,7 +3,8 @@ use std::fs;
 use std::process::Command;
 use std::collections::HashMap;
 
-const LAST_BG: usize = 3;
+const LAST_BG: usize = 4;
+const LAST_SAD_BG: usize = 0;
 const TRACK_NUM: usize = 9;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -30,7 +31,6 @@ pub fn create() {
             "res/compilation/callme.mp3",
             "res/compilation/snowfall.mp3",
             "res/compilation/drowning.mp3",
-            "res/compilation/livinglife.mp3",
             "res/compilation/gravity.mp3",
             "res/compilation/shootout.mp3",
         ],
@@ -48,12 +48,13 @@ pub fn create() {
         ],
         PlaylistType::Hardcore => vec![
             "res/compilation/cthulhu.mp3",
-            "res/compilation/damage.mp3",
             "res/compilation/mybad.mp3",
             "res/compilation/live-another-day.mp3",
             "res/compilation/rapture.mp3",
             "res/compilation/override.mp3",
             "res/compilation/templar.mp3",
+            "res/compilation/rio.mp3",
+            "res/compilation/wakeup.mp3",
         ],
     }.iter().map(|x| x.to_string()).collect();
 
@@ -85,6 +86,8 @@ pub fn create() {
     audio_info.insert("res/compilation/gravity.mp3", ("Gravity", "https://youtu.be/BmhL89jG53s"));
     audio_info.insert("res/compilation/shootout.mp3", ("Shootout", "https://youtu.be/eIoZxhBKA7c"));
     audio_info.insert("res/compilation/templar.mp3", ("TEMPLAR", "https://youtu.be/qQqQvJTYdfg"));
+    audio_info.insert("res/compilation/rio.mp3", ("Life in Rio", "https://youtu.be/_g1_mG6Ru3M"));
+    audio_info.insert("res/compilation/wakeup.mp3", ("WAKE UP!", "https://youtu.be/tKvEnZSoqas"));
 
     let mut desc: String = String::new();
     let mut timestamp: u64 = 0;
@@ -111,10 +114,16 @@ pub fn create() {
     ffmpeg_cmd.push_str(format!(" -filter_complex \"[0:a][1:a]concat=n={}:v=0:a=1\" output/audio.mp3", audios.len()).as_str());
     Command::new("sh").args(["-c", ffmpeg_cmd.as_str()]).output().unwrap();
 
-    println!("Overlay image...");
+    let bg: String = if ptype == PlaylistType::Sad {
+        format!("sad{}", rand::thread_rng().gen_range(0..=LAST_SAD_BG))
+    } else {
+        rand::thread_rng().gen_range(0..=LAST_BG).to_string()
+    };
+
+    println!("Overlay image (res/compilation/backgrounds/{}.png)...", bg);
     ffmpeg_cmd = format!(
         "ffmpeg -loop 1 -i res/compilation/backgrounds/{}.png -i output/audio.mp3 -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest output/0.mp4",
-        if ptype == PlaylistType::Sad { "sad".to_string() } else { rand::thread_rng().gen_range(0..=LAST_BG).to_string() }
+        bg
     );
     Command::new("sh").args(["-c", ffmpeg_cmd.as_str()]).output().unwrap();
 
