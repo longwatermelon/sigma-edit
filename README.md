@@ -6,7 +6,7 @@ Requires [ffmpeg](https://ffmpeg.org) to combine audio and video together.
 # Usage
 ```
 mkdir output
-cargo r [number of output videos, default is 1]
+cargo r [playlist|number of output shorts]
 ```
 
 Configuration options

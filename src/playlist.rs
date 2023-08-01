@@ -103,7 +103,7 @@ pub fn create() {
     }
 
     println!("Audios: {:?}", audios);
-    fs::write("output/desc", format!("{}\n\n#sigma #phonk", desc)).unwrap();
+    fs::write("output/desc", format!("{}\n#sigma #phonk\n", desc)).unwrap();
 
     let mut ffmpeg_cmd: String = String::from("ffmpeg");
     for audio in &audios {
