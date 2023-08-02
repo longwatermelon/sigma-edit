@@ -5,7 +5,7 @@ Requires [ffmpeg](https://ffmpeg.org) to combine audio and video together.
 
 # Usage
 ```
-mkdir output
+mkdir out
 cargo r [playlist|number of output shorts]
 ```
 

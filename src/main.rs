@@ -12,13 +12,13 @@ use std::process::exit;
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
 
-    if fs::remove_dir_all("output").is_err() {
-        eprintln!("Unable to remove contents of output/. Does the directory exist?");
+    if fs::remove_dir_all("out").is_err() {
+        eprintln!("Unable to remove contents of out/. Does the directory exist?");
         exit(1);
     }
 
-    if fs::create_dir("output").is_err() {
-        eprintln!("Unable to create output directory.");
+    if fs::create_dir("out").is_err() {
+        eprintln!("Unable to create out directory.");
         exit(1);
     }
 
@@ -39,7 +39,7 @@ fn main() {
     } else {
         for i in 0..n {
             println!("Producing video {}/{}...", i + 1, n);
-            let filename: String = format!("output/{}.mp4", i);
+            let filename: String = format!("out/{}.mp4", i);
             short::produce(filename.as_str());
         }
     }

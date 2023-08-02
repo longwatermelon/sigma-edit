@@ -103,7 +103,7 @@ pub fn create() {
     }
 
     println!("Audios: {:?}", audios);
-    fs::write("output/desc", format!("{}\n#sigma #phonk\n", desc)).unwrap();
+    fs::write("out/desc", format!("{}\n#sigma #phonk\n", desc)).unwrap();
 
     let mut ffmpeg_cmd: String = String::from("ffmpeg");
     for audio in &audios {
@@ -111,7 +111,7 @@ pub fn create() {
     }
 
     println!("Concat audios...");
-    ffmpeg_cmd.push_str(format!(" -filter_complex \"[0:a][1:a]concat=n={}:v=0:a=1\" output/audio.mp3", audios.len()).as_str());
+    ffmpeg_cmd.push_str(format!(" -filter_complex \"[0:a][1:a]concat=n={}:v=0:a=1\" out/audio.mp3", audios.len()).as_str());
     Command::new("sh").args(["-c", ffmpeg_cmd.as_str()]).output().unwrap();
 
     let bg: String = if ptype == PlaylistType::Sad {
@@ -122,7 +122,7 @@ pub fn create() {
 
     println!("Overlay image (res/compilation/backgrounds/{}.png)...", bg);
     ffmpeg_cmd = format!(
-        "ffmpeg -loop 1 -i res/compilation/backgrounds/{}.png -i output/audio.mp3 -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest output/0.mp4",
+        "ffmpeg -loop 1 -i res/compilation/backgrounds/{}.png -i out/audio.mp3 -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -shortest out/0.mp4",
         bg
     );
     Command::new("sh").args(["-c", ffmpeg_cmd.as_str()]).output().unwrap();
