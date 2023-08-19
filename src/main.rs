@@ -29,13 +29,22 @@ fn main() {
         if let Ok(i) = res {
             i
         } else {
-            -1
+            if args[0] == "playlist" {
+                -1
+            } else {
+                -2
+            }
         }
     };
 
-    if n == -1 && args[0] == "playlist" {
+    // Playlist
+    if n == -1 {
         println!("Producing playlist.");
         playlist::create();
+    }
+    else if n == -2 {
+        eprintln!("Unrecognized argument '{}'.", args[0]);
+        exit(1);
     } else {
         for i in 0..n {
             println!("Producing video {}/{}...", i + 1, n);
