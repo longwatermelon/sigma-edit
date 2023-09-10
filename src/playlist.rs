@@ -3,7 +3,7 @@ use std::fs;
 use std::process::Command;
 use std::collections::HashMap;
 
-const LAST_BG: usize = 6;
+const LAST_BG: usize = 3;
 const LAST_SAD_BG: usize = 0;
 const TRACK_NUM: usize = 9;
 
