@@ -42,13 +42,18 @@ impl Video {
     }
 }
 
-pub fn produce(output_path: &str) {
+pub fn produce(output_path: &str, short_type: Option<i32>) {
     let mut file = File::open("config/config.json").expect("Failed to read config.");
     let mut contents: String = String::new();
     file.read_to_string(&mut contents).unwrap();
     let cfg: serde_json::Value = serde_json::from_str(&contents).expect("Failed to parse json.");
 
-    let song_path: String = match rand::thread_rng().gen_range(0..4) {
+    let index: i32 = match short_type {
+        Some(i) => i,
+        None => rand::thread_rng().gen_range(0..4),
+    };
+
+    let song_path: String = match index {
         0 => produce_edit(&cfg),
         1 => produce_compare(&cfg),
         2 => produce_month(),

@@ -1,13 +1,17 @@
 use crate::effects;
 use opencv::{prelude::*, videoio};
 use opencv::videoio::{VideoCapture, VideoWriter};
+use rand::seq::SliceRandom;
 use std::io::Write;
 
+const LAST_BG: i32 = 3;
+
 pub fn create(writer: &mut VideoWriter) -> opencv::Result<()> {
-    // Initial bateman start (4.71s)
-    println!("Writing intro clip...");
+    // Initial bateman start (5.4s)
+    print!("Writing intro clip...");
+    std::io::stdout().flush().unwrap();
     let mut bateman_clip: VideoCapture = VideoCapture::from_file("res/video/bg/intro.mp4", videoio::CAP_ANY)?;
-    for _ in 0..(30. * 5.3) as i32 {
+    for _ in 0..(30. * 5.4) as i32 {
         let mut frame: Mat = Mat::default();
         bateman_clip.read(&mut frame)?;
 
@@ -15,11 +19,17 @@ pub fn create(writer: &mut VideoWriter) -> opencv::Result<()> {
     }
 
     // Backgrounds
-    let bgs: &[Mat] = &[
-        opencv::imgcodecs::imread("res/video/bg/0.png", opencv::imgcodecs::ImreadModes::IMREAD_COLOR as i32)?,
-        opencv::imgcodecs::imread("res/video/bg/1.png", opencv::imgcodecs::ImreadModes::IMREAD_COLOR as i32)?,
-        opencv::imgcodecs::imread("res/video/bg/2.png", opencv::imgcodecs::ImreadModes::IMREAD_COLOR as i32)?,
-    ];
+    let mut bgs: Vec<i32> = (0..=LAST_BG).collect();
+    bgs.shuffle(&mut rand::thread_rng());
+
+    fn imread(i: i32) -> Mat {
+        opencv::imgcodecs::imread(
+                format!("res/video/bg/{}.png", i).as_str(),
+                opencv::imgcodecs::ImreadModes::IMREAD_COLOR as i32
+        ).unwrap()
+    }
+
+    let bgs: &[Mat] = &[imread(bgs[0]), imread(bgs[1]), imread(bgs[2])];
 
     for i in 0..3 {
         print!("\rWriting image clip {}...", i + 1);
