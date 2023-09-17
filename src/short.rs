@@ -1,4 +1,4 @@
-use crate::{edit, compare, month};
+use crate::{edit, compare, month, bg};
 use opencv::{prelude::*, core, videoio};
 use opencv::videoio::{VideoCapture, VideoWriter};
 use rand::Rng;
@@ -14,7 +14,8 @@ enum Config<'a> {
         rig_ties: bool,
         probability: f32
     },
-    Month
+    Month,
+    Background,
 }
 
 #[derive(Clone)]
@@ -47,10 +48,11 @@ pub fn produce(output_path: &str) {
     file.read_to_string(&mut contents).unwrap();
     let cfg: serde_json::Value = serde_json::from_str(&contents).expect("Failed to parse json.");
 
-    let song_path: String = match rand::thread_rng().gen_range(0..3) {
+    let song_path: String = match rand::thread_rng().gen_range(0..4) {
         0 => produce_edit(&cfg),
         1 => produce_compare(&cfg),
         2 => produce_month(),
+        3 => produce_bg(),
         _ => unreachable!()
     };
 
@@ -76,7 +78,8 @@ fn create(output: &str, beats: &[f32], cfg: Config) -> opencv::Result<()> {
             VideoCapture::from_file("res/video/compare/shelby.mp4", videoio::CAP_ANY)?,
             rig_ties, probability
         )?,
-        Config::Month => month::create(&mut out, beats)?
+        Config::Month => month::create(&mut out, beats)?,
+        Config::Background => bg::create(&mut out)?,
     }
 
     out.release()?;
@@ -180,5 +183,13 @@ fn produce_month() -> String {
     println!("Music: {}", song.path);
 
     create("no-audio.mp4", song.beats.as_slice(), Config::Month).expect("Failed to create video.");
+    song.path
+}
+
+fn produce_bg() -> String {
+    println!("Video type: Wallpaper");
+
+    let song: Song = Song::new("res/audio/bg.mp3", &[]);
+    create("no-audio.mp4", &song.beats, Config::Background).expect("Failed to create video.");
     song.path
 }

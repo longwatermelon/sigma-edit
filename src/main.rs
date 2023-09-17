@@ -4,6 +4,7 @@ mod short;
 mod edit;
 mod compare;
 mod month;
+mod bg;
 mod playlist;
 
 use std::fs;
