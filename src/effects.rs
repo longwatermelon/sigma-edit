@@ -69,4 +69,3 @@ pub fn draw_text(frame: &mut Mat, text: &str, x: Option<i32>, y: Option<i32>, fo
 
     Ok(())
 }
-
