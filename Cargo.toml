@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 mp3-duration = "0.1.10"
-opencv = "0.82.1"
+opencv = "0.88.8"
 rand = "0.8.5"
 serde_json = "1.0.96"
 

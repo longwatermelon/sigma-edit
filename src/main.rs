@@ -29,7 +29,7 @@ fn main() {
     if args[0] == "playlist" {
         println!("Producing playlist.");
         playlist::create();
-    } else if args[0] == "type" {
+    } else if args[0] == "short" {
         println!("Producing video type '{}'...", args[1]);
 
         let index: i32 = match args[1].as_str() {
