@@ -5,6 +5,7 @@ mod edit;
 mod compare;
 mod month;
 mod bg;
+mod joke;
 mod playlist;
 
 use std::fs;
@@ -37,6 +38,7 @@ fn main() {
             "comparison" => 1,
             "month" => 2,
             "wallpaper" => 3,
+            "joke" => 4,
             _ => {
                 eprintln!("'{}' is not a valid video type.", args[1]);
                 std::process::exit(1);
