@@ -1,6 +1,8 @@
 # sigma-edit
 Automatically generated sigma edits. These are not meant to be serious.
 
+Videos uploaded [here](https://www.youtube.com/@BasedSigmaCentral) (YouTube)
+
 Requires [ffmpeg](https://ffmpeg.org) to combine audio and video together.
 
 # Usage
